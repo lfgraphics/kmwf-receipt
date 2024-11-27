@@ -40,7 +40,7 @@ export default function App() {
   const [subsType, setSubsType] = useState<"Mahana" | "Salana">("Mahana");
   const [mad, setMad] = useState<"Sadqa" | "Zakat">("Sadqa");
   const [modeOfPayment, setModeOfPayment] = useState<"Online" | "Cash">("Cash");
-  const [paymentProof, setPaymentProof] = useState<String | null>(null);
+  const [paymentProof, setPaymentProof] = useState<string>("");
   const [cameraOpen, setCameraOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -50,9 +50,6 @@ export default function App() {
   const mobileInputRef = React.useRef<TextInput>(null);
   const addressInputRef = React.useRef<TextInput>(null);
   const driverIdInputRef = React.useRef<TextInput>(null);
-  const driverMobileInputRef = React.useRef<TextInput>(null);
-  const fuelQuantityInputRef = React.useRef<TextInput>(null);
-  const gpsLocationInputRef = React.useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // function declarations---->
@@ -72,35 +69,9 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const userConfirmed = await new Promise((resolve) => {
-        Alert.alert(
-          "Logout Confirmation",
-          "Are you sure you want to logout?",
-          [
-            {
-              text: "Cancel",
-              onPress: () => resolve(false),
-              style: "cancel",
-            },
-            { text: "Logout", onPress: () => resolve(true) },
-          ],
-          { cancelable: false }
-        );
-      });
-      if (!userConfirmed) return;
-      await AsyncStorage.removeItem("userToken");
-      await AsyncStorage.removeItem("userData");
-      await AsyncStorage.removeItem("pushToken");
-      router.replace("/auth" as any);
-    } catch (error) {
-      Alert.alert(
-        "Logout Error",
-        "An error occurred during logout. Please try again."
-      );
-    }
-  };
+  useEffect(() => {
+    modeOfPayment == "Online" && openCamera();
+  }, [modeOfPayment]);
 
   const submitTime = () => {
     const currentDateTime = new Date().toLocaleString();
@@ -243,7 +214,7 @@ export default function App() {
     }
   };
 
-  const openNumberPlateCamera = async () => {
+  const openCamera = () => {
     setCameraOpen(true);
   };
 
@@ -395,7 +366,7 @@ export default function App() {
                 <Picker.Item label="Online" value="Online" />
               </Picker>
             </View>
-            {paymentProof && (
+            {modeOfPayment == "Online" && paymentProof && (
               <Image
                 source={{ uri: `data:image/jpeg;base64,${paymentProof}` }}
                 style={styles.uploadedImage}
@@ -403,9 +374,7 @@ export default function App() {
             )}
             {modeOfPayment == "Online" && !paymentProof && (
               <TouchableOpacity
-                onPress={() =>
-                  paymentProof === null ? openNumberPlateCamera() : null
-                }
+                onPress={() => (paymentProof === null ? openCamera() : null)}
                 style={[styles.photoButton]}
               >
                 <View

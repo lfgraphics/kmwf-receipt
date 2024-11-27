@@ -35,7 +35,7 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="/screens/receipt" options={{ headerShown: false }} />
+        <Stack.Screen name="screens/receipt" options={{ headerShown: false }} />
         {/* <Stack.Screen name="fueling" options={{ headerShown: false }} /> */}
         {/* <Stack.Screen name="notifications" options={{ headerShown: false }} /> */}
         <Stack.Screen name="auth" options={{ headerShown: false }} />
