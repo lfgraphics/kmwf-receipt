@@ -9,15 +9,12 @@ const SECRET_KEY = process.env.JWT_SECRET;
 
 // Register
 router.post("/register", async (req, res) => {
-  const { userid, name, pas } = req.body;
+  const { userid, name, pas, phoneNo, role } = req.body;
   try {
-    // Hash the password before saving
     const hashedPassword = await argon2.hash(pas);
-    const user = new User({ userid, name, pas: hashedPassword });
+    const user = new User({ userid, name, phoneNo, pas: hashedPassword, role });
     await user.save();
-    res
-      .status(201)
-      .json({ heading: "Success", message: "User registered successfully!" });
+    res.status(201).json({ heading: "Success", message: "User registered successfully!" });
   } catch (error) {
     res.status(400).json({ heading: "Failure", error: error.message });
   }
@@ -30,7 +27,6 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ userid });
     if (!user) throw new Error("User not found");
 
-    // Compare the hashed password
     const isMatch = await argon2.verify(user.pas, pas);
     if (!isMatch) throw new Error("Invalid password");
 
@@ -38,10 +34,13 @@ router.post("/login", async (req, res) => {
     delete userData.pas;
     delete userData.__v;
 
-    const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "7d" });
-    res.json({ title: "Success", token, user: userData });
+    const token = jwt.sign({ id: user._id, role: user.role }, SECRET_KEY, { expiresIn: "7d" });
+    if (!user.verified) {
+      res.status(402).json({ title: "Error", message: "User is not verified yet\nContact admin for user verification" })
+    }
+    res.json({ title: "Success", token, user: userData, role: userData.role });
   } catch (error) {
-    res.status(400).json({ title: 'Error', message: error.message });
+    res.status(400).json({ title: "Error", message: error.message });
   }
 });
 

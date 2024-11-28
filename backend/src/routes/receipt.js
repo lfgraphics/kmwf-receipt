@@ -1,9 +1,10 @@
 const express = require("express");
 const Receipt = require("../models/Receipt");
 const router = express.Router();
+const authMiddleware = require('../middleware/authMiddleware')
 
 // Create a single receipt
-router.post("/create", async (req, res) => {
+router.post("/create", authMiddleware(["recipient", "admin"]), async (req, res) => {
     try {
         const receipt = new Receipt(req.body);
         await receipt.save();
@@ -14,7 +15,7 @@ router.post("/create", async (req, res) => {
 });
 
 // Create multiple receipts
-router.post("/create-bulk", async (req, res) => {
+router.post("/create-bulk", authMiddleware(["recipient", "admin"]), async (req, res) => {
     try {
         const receipts = await Receipt.insertMany(req.body);
         res.status(201).json({ title: 'Success', message: "Receipts created successfully", receipts });
@@ -24,7 +25,7 @@ router.post("/create-bulk", async (req, res) => {
 });
 
 // Get a single receipt by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware(["recipient", "admin"]), async (req, res) => {
     try {
         const receipt = await Receipt.findById(req.params.id);
         if (!receipt) return res.status(404).json({ title: 'Success', message: "Receipt not found" });
@@ -35,7 +36,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Get all receipts
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware(["recipient", "admin"]), async (req, res) => {
     try {
         const { usoolKuninda, startDate, endDate, name, mobile, address, mad, subsType, modeOfPayment } = req.query;
 
@@ -79,7 +80,7 @@ router.get("/", async (req, res) => {
 
 
 // Update a single receipt by ID
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", authMiddleware(["admin"]), async (req, res) => {
     try {
         const receipt = await Receipt.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
@@ -93,7 +94,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete a single receipt by ID
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware(["admin"]), async (req, res) => {
     try {
         const receipt = await Receipt.findByIdAndDelete(req.params.id);
         if (!receipt) return res.status(404).json({ title: 'Falior', message: "Receipt not found" });
@@ -104,7 +105,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 // Delete multiple receipts
-router.post("/delete-bulk", async (req, res) => {
+router.post("/delete-bulk", authMiddleware(["admin"]), async (req, res) => {
     try {
         const { ids } = req.body;
         const result = await Receipt.deleteMany({ _id: { $in: ids } });
