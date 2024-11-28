@@ -1,21 +1,12 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+const moment = require("moment-timezone");
 
 const UserSchema = new mongoose.Schema({
   userid: { type: String, required: true, unique: true },
   name: { type: String, required: true },
+  phoneNo: { type: String, required: true, unique: true },
   pas: { type: String, required: true },
+  createdAt: { type: Date, default: () => moment().tz("Asia/Kolkata").toDate() },
 });
-
-// Hash the password before saving
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
-
-UserSchema.methods.comparePassword = function (password) {
-  return bcrypt.compare(password, this.password);
-};
 
 module.exports = mongoose.model("User", UserSchema);

@@ -6,16 +6,16 @@ import { useTheme } from '@react-navigation/native';
 import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-// import { registerForPushNotificationsAsync, registerPushTokenWithServer } from '@/app/utils/notifications';
+import { baseUrl } from '@/src/utils/authUtils';
 
 export default function AuthScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const colorScheme = useColorScheme();
   const [isLogin, setIsLogin] = useState(true);
-  const [userId, setUserId] = useState('');
-  const [password, setPassword] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [userid, setUserId] = useState("");
+  const [pas, setPassword] = useState('');
+  const [phoneNo, setPhoneNumber] = useState("");
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -41,20 +41,17 @@ export default function AuthScreen() {
       }
 
       const body = JSON.stringify({
-        userId,
-        password,
-        deviceUUID,
-        phoneNumber: isLogin ? undefined : phoneNumber,
+        userid,
+        pas,
+        phoneNo: isLogin ? undefined : phoneNo,
         name: isLogin ? undefined : name,
-        appName: 'Bowsers Fueling',
-        ...(await AsyncStorage.getItem('pushToken')) ? { pushToken: await AsyncStorage.getItem('pushToken') } : {},
       });
 
       const endpoint = isLogin ? 'login' : 'signup';
-      const response = await fetch(`https://bowser-backend-2cdr.onrender.com/auth/${endpoint}`, { //https://bowser-backend-2cdr.onrender.com  //http://192.168.137.1:5000
-        method: 'POST',
+      const response = await fetch(`${baseUrl}/auth/${endpoint}`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: body,
       });
@@ -87,21 +84,14 @@ export default function AuthScreen() {
       if (data.token) {
         try {
           await AsyncStorage.setItem('userToken', data.token);
-          await AsyncStorage.setItem('isLoggedIn', 'true'); // Set login flag
+          await AsyncStorage.setItem('isLoggedIn', 'true');
           if (data.loginTime) {
             await AsyncStorage.setItem('loginTime', data.loginTime);
           }
           if (data.user) {
             await AsyncStorage.setItem('userData', JSON.stringify(data.user));
           }
-
-          // Register push token every time after successful login
-          // const localPushToken = await registerForPushNotificationsAsync();
-          // if (localPushToken) {
-          //   await AsyncStorage.setItem('pushToken', localPushToken);
-          //   await registerPushTokenWithServer(data.user['User Id'], localPushToken);
-          // }
-          router.replace('/'); // Navigate to index page
+          router.replace('/');
         } catch (storageError) {
           console.error('Error saving to AsyncStorage:', storageError);
           Alert.alert("Storage Error", "Failed to save user data. Please try again.", [{ text: "OK" }]);
@@ -127,18 +117,18 @@ export default function AuthScreen() {
   };
 
   const validateInputs = () => {
-    if (!userId) {
+    if (!userid) {
       alert("User ID is required.");
       userIdInputRef.current?.focus();
       return false;
     }
-    if (!password) {
+    if (!pas) {
       alert("Password is required.");
       passwordInputRef.current?.focus();
       return false;
     }
     if (!isLogin) {
-      if (!phoneNumber) {
+      if (!phoneNo) {
         alert("Phone number is required.");
         phoneNumberInputRef.current?.focus();
         return false;
@@ -151,7 +141,7 @@ export default function AuthScreen() {
     }
     // Check if User ID is alphanumeric (contains only letters and numbers)
     const isValidUserId = /^[a-zA-Z0-9]+$/; // Example: "johnDoe123" is valid, "!@#$" is not
-    if (!isValidUserId.test(userId)) {
+    if (!isValidUserId.test(userid)) {
       Alert.alert(
         "Enter Correct Details",
         "Invalid User ID format. User ID should only contain letters and numbers.",
@@ -163,7 +153,7 @@ export default function AuthScreen() {
 
     // Check if Phone Number is in the format +1234567890 (optional + and 10-13 digits)
     const isValidPhoneNumber = /^\+?\d{10,13}$/; // Example: "+1234567890" is valid, "123456789" is valid, "123456" is not
-    if (!isLogin && !isValidPhoneNumber.test(phoneNumber)) {
+    if (!isLogin && !isValidPhoneNumber.test(phoneNo)) {
       Alert.alert(
         "Enter Correct Details",
         "Invalid Phone Number format. Phone Number should be in the format +1234567890.",
@@ -202,7 +192,7 @@ export default function AuthScreen() {
                 style={[styles.input, { color: colorScheme === 'dark' ? '#ECEDEE' : '#11181C' }]}
                 placeholder="Enter user ID"
                 placeholderTextColor={colorScheme === 'dark' ? '#9BA1A6' : '#687076'}
-                value={userId}
+                value={userid}
                 onChangeText={setUserId}
                 returnKeyType="next"
                 onSubmitEditing={() => passwordInputRef.current?.focus()}
@@ -218,7 +208,7 @@ export default function AuthScreen() {
                   style={[styles.input, styles.passwordInput, { color: colorScheme === 'dark' ? '#ECEDEE' : '#11181C' }]}
                   placeholder="Enter password"
                   placeholderTextColor={colorScheme === 'dark' ? '#9BA1A6' : '#687076'}
-                  value={password}
+                  value={pas}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                   returnKeyType={isLogin ? "done" : "next"}
@@ -247,7 +237,7 @@ export default function AuthScreen() {
                     style={[styles.input, { color: colorScheme === 'dark' ? '#ECEDEE' : '#11181C' }]}
                     placeholder="Enter phone number"
                     placeholderTextColor={colorScheme === 'dark' ? '#9BA1A6' : '#687076'}
-                    value={phoneNumber}
+                    value={phoneNo}
                     onChangeText={setPhoneNumber}
                     keyboardType="phone-pad"
                     returnKeyType="next"

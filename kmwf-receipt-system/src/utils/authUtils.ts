@@ -4,6 +4,8 @@ import { Alert } from 'react-native';
 // This is a placeholder implementation. Replace with your actual authentication logic.
 let isLoggedIn = false;
 
+export const baseUrl = "http://bowser192.168.137.1:5000";
+
 export const checkUserLoggedIn = async (isLoggingIn = false) => {
   try {
     const userToken = await AsyncStorage.getItem('userToken');
@@ -32,10 +34,10 @@ export const checkUserLoggedIn = async (isLoggingIn = false) => {
     }
 
     if (isOnline) {
-      const response = await fetch('https://bowser-backend-2cdr.onrender.com/auth/verify-token', { //https://bowser-backend-2cdr.onrender.com
-        method: 'POST',
+      const response = await fetch(`${baseUrl}/auth/verify-token`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ token: userToken, deviceUUID }),
       });

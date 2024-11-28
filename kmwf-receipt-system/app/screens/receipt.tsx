@@ -17,32 +17,27 @@ import { useState, useRef, useEffect } from "react";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
-import { ReceiptDetails } from "@/src/types";
+import { ReceiptDetails, UserData } from "@/src/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import NetInfo from "@react-native-community/netinfo";
-import { ThemedView } from "@/components/ThemedView";
 import { Ionicons } from "@expo/vector-icons";
 import ImageCapture from "@/components/ImageCapture";
+import { baseUrl } from "@/src/utils/authUtils";
 
 export default function App() {
   // declare state variables---->
   const colorScheme = useColorScheme();
-  const [userData, setUserData] = useState<{
-    name: string;
-    userId: string;
-  } | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [responseData, setResponseData] = useState<ReceiptDetails | null>(null);
   const { colors } = useTheme();
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [address, setaddress] = useState("");
-  const [dateTime, setDateTime] = useState(Date());
   const [subsType, setSubsType] = useState<"Mahana" | "Salana">("Mahana");
   const [mad, setMad] = useState<"Sadqa" | "Zakat">("Sadqa");
   const [modeOfPayment, setModeOfPayment] = useState<"Online" | "Cash">("Cash");
   const [paymentProof, setPaymentProof] = useState<string>("");
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [isOnline, setIsOnline] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
 
   // declare refs for input fields---->
@@ -62,22 +57,12 @@ export default function App() {
         setUserData(JSON.parse(userDataString));
       }
     };
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsOnline(state.isConnected ?? false);
-    });
     getUserData();
-    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     modeOfPayment == "Online" && openCamera();
   }, [modeOfPayment]);
-
-  const submitTime = () => {
-    const currentDateTime = new Date().toLocaleString();
-    setDateTime(currentDateTime);
-    return currentDateTime;
-  };
 
   const submitDetails = async () => {
     setFormSubmitting(true);
@@ -89,128 +74,81 @@ export default function App() {
   };
 
   const submitFormData = async () => {
-    let currentFuelingDateTime = dateTime;
-    const userDataString = await AsyncStorage.getItem("userData");
-    const userData = userDataString ? JSON.parse(userDataString) : null;
     if (!userData) {
       Alert.alert("Error", "User data not found. Please log in again.");
       router.replace("/auth");
       return;
     }
 
-    currentFuelingDateTime = await submitTime();
-
     const formData: ReceiptDetails = {
       name,
       mobile,
       address,
-      dateTime,
       mad,
       subsType,
       modeOfPayment,
       paymentProof,
       usoolKuninda: {
         name: userData.name,
-        id: userData.userId,
+        userid: userData.userid,
         phoneNo: userData.phoneNo,
       },
     };
 
-    if (isOnline) {
-      try {
-        const response = await fetch(
-          `https://bowser-backend-2cdr.onrender.com/addFuelingTransaction`,
+    try {
+      const response = await fetch(`${baseUrl}/receipts/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const responseData = await response.json();
+      setResponseData(responseData);
+      Alert.alert(
+        responseData.title,
+        responseData.message,
+        [
           {
-            //https://bowser-backend-2cdr.onrender.com // http://192.168.137.1:5000
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const responseData = await response.json();
-        Alert.alert(
-          "Success",
-          responseData.message,
-          [
-            {
-              text: "OK",
-              onPress: () => {},
-            },
-          ],
-          { cancelable: false }
-        );
-        resetForm();
-        router.replace("/");
-      } catch (err) {
-        console.error("Fetch error:", err);
-        let errorMessage = "An unknown error occurred";
+            text: "OK",
+            onPress: () => {},
+          },
+        ],
+        { cancelable: false }
+      );
+      resetForm();
+      
+    } catch (err) {
+      console.error("Fetch error:", err);
+      let errorMessage = "An unknown error occurred";
 
-        if (err instanceof Response) {
-          try {
-            const errorData = await err.json();
-            errorMessage = errorData.message || errorData.error || errorMessage;
-          } catch (jsonError) {
-            console.error("Error parsing JSON:", jsonError);
-          }
-        } else if (err instanceof Error) {
-          errorMessage = err.message;
+      if (err instanceof Response) {
+        try {
+          const errorData = await err.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (jsonError) {
+          console.error("Error parsing JSON:", jsonError);
         }
-
-        Alert.alert(
-          "Error",
-          errorMessage,
-          [
-            {
-              text: "OK",
-              onPress: () => {},
-            },
-          ],
-          { cancelable: false }
-        );
-      } finally {
-        setFormSubmitting(false);
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
-    } else {
-      try {
-        const netInfo = await NetInfo.fetch();
-        if (netInfo.isConnected) {
-          setIsOnline(true);
-          submitDetails();
-          return;
-        }
 
-        // If still offline, ask to save data offline
-        const offlineData = await AsyncStorage.getItem("offlineFuelingData");
-        let offlineArray = offlineData ? JSON.parse(offlineData) : [];
-        offlineArray.push(formData);
-        await AsyncStorage.setItem(
-          "offlineFuelingData",
-          JSON.stringify(offlineArray)
-        );
-        Alert.alert(
-          "Success",
-          "Data saved offline. It will be submitted when you're back online.",
-          [{ text: "OK", onPress: () => {} }],
-          { cancelable: false }
-        );
-        resetForm();
-        router.replace("/");
-      } catch (error) {
-        console.error("Error handling offline data:", error);
-        Alert.alert(
-          "Error",
-          "Failed to handle offline data. Please try again.",
-          [{ text: "OK", onPress: () => {} }],
-          { cancelable: false }
-        );
-      } finally {
-        setFormSubmitting(false);
-      }
+      Alert.alert(
+        "Error",
+        errorMessage,
+        [
+          {
+            text: "OK",
+            onPress: () => {},
+          },
+        ],
+        { cancelable: false }
+      );
+    } finally {
+      setFormSubmitting(false);
     }
   };
 
@@ -219,7 +157,6 @@ export default function App() {
   };
 
   const resetForm = () => {};
-  // form data handling
   const validateInputs = () => {
     if (!name) {
       alert("Name is required.");
