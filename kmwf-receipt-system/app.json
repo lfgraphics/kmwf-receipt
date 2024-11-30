@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "kmwf-receipt-system",
+    "name": "KMWF Receipt",
     "slug": "kmwf-receipt-system",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -45,6 +45,13 @@
         "projectId": "121a1c6e-4906-455f-aa45-be0f7f653568"
       }
     },
-    "owner": "tahakazmi"
+    "owner": "tahakazmi",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "url": "https://u.expo.dev/121a1c6e-4906-455f-aa45-be0f7f653568"
+    }
   }
 }
