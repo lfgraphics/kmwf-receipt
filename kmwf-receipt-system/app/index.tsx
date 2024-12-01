@@ -137,12 +137,6 @@ const App = () => {
           }}
         >
           <Text style={{ color: "white" }}>Create Receipt</Text>
-          <MaterialIcons
-            name="local-gas-station"
-            size={24}
-            color="white"
-            style={{ marginRight: 5 }}
-          />
         </View>
       </Link>
 

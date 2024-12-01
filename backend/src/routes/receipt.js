@@ -8,9 +8,14 @@ router.post("/create", authMiddleware(["recipient", "admin"]), async (req, res) 
     try {
         const receipt = new Receipt(req.body);
         await receipt.save();
-        res.status(201).json({ title: 'Success', message: "Receipt created successfully", receipt });
+
+        // Exclude paymentProof manually from the response
+        const responseReceipt = receipt.toObject(); // Convert Mongoose document to plain object
+        delete responseReceipt.paymentProof; // Remove paymentProof
+
+        res.status(201).json({ title: 'Success', message: "Receipt created successfully", receipt: responseReceipt });
     } catch (error) {
-        res.status(400).json({ title: 'Falior', error: error.message });
+        res.status(400).json({ title: 'Failure', error: error.message });
     }
 });
 

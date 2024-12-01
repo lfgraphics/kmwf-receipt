@@ -2,13 +2,14 @@ const express = require("express");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const argon2 = require("argon2");
+const authMiddleware = require('../middleware/authMiddleware')
 require('dotenv').config();
 
 const router = express.Router();
 const SECRET_KEY = process.env.JWT_SECRET;
 
 // Register
-router.post("/register", async (req, res) => {
+router.post("/signup", async (req, res) => {
   const { userid, name, pas, phoneNo, role } = req.body;
   try {
     const hashedPassword = await argon2.hash(pas);
@@ -43,5 +44,9 @@ router.post("/login", async (req, res) => {
     res.status(400).json({ title: "Error", message: error.message });
   }
 });
+
+router.post("/verify-token", authMiddleware(["recipient", "admin"]), async (req, res) => {
+  let { userToken } = req.body
+})
 
 module.exports = router;

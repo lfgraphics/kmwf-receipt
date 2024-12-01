@@ -21,30 +21,33 @@ import { ReceiptDetails, UserData } from "@/src/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import ImageCapture from "@/components/ImageCapture";
+import * as ImagePicker from "expo-image-picker";
 import { baseUrl } from "@/src/utils/authUtils";
+import { compressImage, formatDate } from "@/src/utils";
 
 export default function App() {
   // declare state variables---->
   const colorScheme = useColorScheme();
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [userToken, setUserToken] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<ReceiptDetails | null>(null);
   const { colors } = useTheme();
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [address, setaddress] = useState("");
+  const [amount, setAmount] = useState<number>(0);
   const [subsType, setSubsType] = useState<"Mahana" | "Salana">("Mahana");
   const [mad, setMad] = useState<"Sadqa" | "Zakat">("Sadqa");
   const [modeOfPayment, setModeOfPayment] = useState<"Online" | "Cash">("Cash");
-  const [paymentProof, setPaymentProof] = useState<string>("");
-  const [cameraOpen, setCameraOpen] = useState(false);
+  const [paymentProof, setPaymentProof] = useState<string | null>(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   // declare refs for input fields---->
   const nameInputRef = React.useRef<TextInput>(null);
+  const amountInputRef = React.useRef<TextInput>(null);
   const mobileInputRef = React.useRef<TextInput>(null);
   const addressInputRef = React.useRef<TextInput>(null);
-  const driverIdInputRef = React.useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // function declarations---->
@@ -53,16 +56,16 @@ export default function App() {
   useEffect(() => {
     const getUserData = async () => {
       const userDataString = await AsyncStorage.getItem("userData");
+      const token = await AsyncStorage.getItem("userToken");
       if (userDataString) {
         setUserData(JSON.parse(userDataString));
+      }
+      if (token) {
+        setUserToken(token);
       }
     };
     getUserData();
   }, []);
-
-  useEffect(() => {
-    modeOfPayment == "Online" && openCamera();
-  }, [modeOfPayment]);
 
   const submitDetails = async () => {
     setFormSubmitting(true);
@@ -84,6 +87,7 @@ export default function App() {
       name,
       mobile,
       address,
+      amount,
       mad,
       subsType,
       modeOfPayment,
@@ -100,6 +104,7 @@ export default function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
         },
         body: JSON.stringify(formData),
       });
@@ -107,7 +112,7 @@ export default function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const responseData = await response.json();
-      setResponseData(responseData);
+      setResponseData(responseData.receipt);
       Alert.alert(
         responseData.title,
         responseData.message,
@@ -119,8 +124,9 @@ export default function App() {
         ],
         { cancelable: false }
       );
+      setModalVisible(true);
+      console.log(responseData)
       resetForm();
-      
     } catch (err) {
       console.error("Fetch error:", err);
       let errorMessage = "An unknown error occurred";
@@ -152,8 +158,27 @@ export default function App() {
     }
   };
 
-  const openCamera = () => {
-    setCameraOpen(true);
+  const openCamera = async () => {
+    if (paymentProof) {
+      return;
+    }
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("Camera permission is required!");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets[0].uri) {
+      const compressedImage = await compressImage(result.assets[0].uri);
+      setPaymentProof(compressedImage);
+    }
   };
 
   const resetForm = () => {};
@@ -163,10 +188,6 @@ export default function App() {
       return false;
     }
     return true;
-  };
-  const handleCapture = async (base64: string) => {
-    await setPaymentProof(base64); // Update the state with the captured image
-    setCameraOpen(false);
   };
 
   return (
@@ -180,11 +201,6 @@ export default function App() {
         >
           <View style={styles.rowContainer}>
             <ThemedText type="title">KMWF Reciept</ThemedText>
-          </View>
-          <View style={styles.section}>
-            <ThemedText style={{ textAlign: "center" }}>
-              {Date().toLocaleString()}
-            </ThemedText>
           </View>
           <View style={styles.section}>
             <View style={styles.inputContainer}>
@@ -240,7 +256,25 @@ export default function App() {
                   setaddress(text);
                 }}
                 returnKeyType="next"
-                onSubmitEditing={() => driverIdInputRef.current?.focus()}
+                onSubmitEditing={() => amountInputRef.current?.focus()}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <ThemedText>Amount</ThemedText>
+              <TextInput
+                ref={amountInputRef}
+                style={[styles.input, { color: colors.text }]}
+                placeholder="5000"
+                keyboardType="number-pad"
+                placeholderTextColor={
+                  colorScheme === "dark" ? "#9BA1A6" : "#687076"
+                }
+                value={String(amount)}
+                onChangeText={(text) => {
+                  setAmount(Number(text));
+                }}
+                returnKeyType="next"
+                onSubmitEditing={() => mobileInputRef.current?.focus()}
               />
             </View>
             <View style={styles.inputContainer}>
@@ -305,13 +339,13 @@ export default function App() {
             </View>
             {modeOfPayment == "Online" && paymentProof && (
               <Image
-                source={{ uri: `data:image/jpeg;base64,${paymentProof}` }}
+                source={{ uri: `${paymentProof}` }}
                 style={styles.uploadedImage}
               />
             )}
             {modeOfPayment == "Online" && !paymentProof && (
               <TouchableOpacity
-                onPress={() => (paymentProof === null ? openCamera() : null)}
+                onPress={() => paymentProof === null && openCamera()}
                 style={[styles.photoButton]}
               >
                 <View
@@ -326,7 +360,6 @@ export default function App() {
               </TouchableOpacity>
             )}
           </View>
-          {cameraOpen && <ImageCapture onCapture={handleCapture} />}
           <TouchableOpacity style={styles.submitButton} onPress={submitDetails}>
             <View
               style={{
@@ -364,6 +397,27 @@ export default function App() {
           <ActivityIndicator size="large" color="#0a7ea4" />
         </View>
       )}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View
+          style={[
+            styles.modalContainer,
+            { backgroundColor: colors.background },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={{ color: colors.text }}>Close</Text>
+          </TouchableOpacity>
+          {responseData && <Text style={{ color: colors.text }}>Created at: {formatDate(String(responseData.createdAt))}</Text>}
+        </View>
+      </Modal>
     </View>
   );
 }

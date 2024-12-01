@@ -1,10 +1,11 @@
 // import { registerForPushNotificationsAsync } from '@/app/utils/notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from "expo-router";
 import { Alert } from 'react-native';
 // This is a placeholder implementation. Replace with your actual authentication logic.
 let isLoggedIn = false;
 
-export const baseUrl = "http://bowser192.168.137.1:5000";
+export const baseUrl = "https://kmwf-receipt-system.onrender.com"; //http://192.168.177.228:4000 // https://kmwf-receipt-system.onrender.com
 
 export const checkUserLoggedIn = async (isLoggingIn = false) => {
   try {
@@ -12,6 +13,7 @@ export const checkUserLoggedIn = async (isLoggingIn = false) => {
     const deviceUUID = await AsyncStorage.getItem('deviceUUID');
 
     if (!userToken || !deviceUUID) {
+      router.replace("./auth")
       return false;
     }
 
@@ -38,8 +40,8 @@ export const checkUserLoggedIn = async (isLoggingIn = false) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
         },
-        body: JSON.stringify({ token: userToken, deviceUUID }),
       });
 
       if (!response.ok) {
@@ -128,6 +130,7 @@ export const signupUser = async (email: string, password: string): Promise<void>
 export const logoutUser = async (): Promise<void> => {
   // Remove push token from AsyncStorage on logout
   await AsyncStorage.removeItem('pushToken');
+  await AsyncStorage.removeItem('UserData');
   // Implement your logout logic here
   isLoggedIn = false;
 };

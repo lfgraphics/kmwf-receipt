@@ -47,7 +47,7 @@ export default function AuthScreen() {
         name: isLogin ? undefined : name,
       });
 
-      const endpoint = isLogin ? 'login' : 'signup';
+      const endpoint = isLogin ? 'login' : 'register';
       const response = await fetch(`${baseUrl}/auth/${endpoint}`, {
         method: "POST",
         headers: {
