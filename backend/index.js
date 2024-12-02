@@ -36,7 +36,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => console.log("Connected to Mon
 const receiptRoutes = require("./src/routes/receipt");
 const authRoutes = require("./src/routes/auth")
 
-app.use('/auth', authRoutes, authLimiter);
-app.use("/receipts", receiptRoutes, authLimiter);
+app.use('/auth', authRoutes);
+app.use("/receipts", receiptRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

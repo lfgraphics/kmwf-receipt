@@ -5,6 +5,13 @@
 /backend/node_modules
 /admin/node_modules
 /kmwf-receipt-system/node_modules
+/kmwf-receipt-system/dist
+/kmwf-receipt-system/.expo
+.expo
+node_modules
+/.expo
+.expo/
+
 /.pnp
 .pnp.*
 .yarn/*
