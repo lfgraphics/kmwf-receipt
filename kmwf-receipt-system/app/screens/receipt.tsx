@@ -104,8 +104,8 @@ export default function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
         },
+        credentials: "include", // Send cookies
         body: JSON.stringify(formData),
       });
       if (!response.ok) {
@@ -125,7 +125,7 @@ export default function App() {
         { cancelable: false }
       );
       setModalVisible(true);
-      console.log(responseData)
+      console.log(responseData);
       resetForm();
     } catch (err) {
       console.error("Fetch error:", err);
@@ -415,7 +415,11 @@ export default function App() {
           >
             <Text style={{ color: colors.text }}>Close</Text>
           </TouchableOpacity>
-          {responseData && <Text style={{ color: colors.text }}>Created at: {formatDate(String(responseData.createdAt))}</Text>}
+          {responseData && (
+            <Text style={{ color: colors.text }}>
+              Created at: {formatDate(String(responseData.createdAt))}
+            </Text>
+          )}
         </View>
       </Modal>
     </View>

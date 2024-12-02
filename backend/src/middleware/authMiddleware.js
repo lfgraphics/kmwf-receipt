@@ -6,26 +6,23 @@ const SECRET_KEY = process.env.JWT_SECRET;
 const authMiddleware = (allowedRoles = []) => {
     return (req, res, next) => {
         try {
-            // Extract the token from the Authorization header
-            const authHeader = req.headers.authorization;
-            if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            // Extract the token from cookies or Authorization header
+            const token = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
+            if (!token) {
                 return res.status(401).json({ title: "Unauthorized", message: "No token provided" });
             }
 
-            const token = authHeader.split(" ")[1];
-
-            // Verify the token
             const decoded = jwt.verify(token, SECRET_KEY);
 
-            // Check if the user's role is allowed (if roles are provided)
+            // Check if the user's role is allowed
             if (allowedRoles.length > 0 && !allowedRoles.includes(decoded.role)) {
                 return res.status(403).json({ title: "Forbidden", message: "Access denied" });
             }
 
-            // Attach the user information to the request object for downstream use
+            // Attach the user information to the request object
             req.user = decoded;
 
-            next(); // Proceed to the next middleware or route handler
+            next();
         } catch (error) {
             res.status(401).json({ title: "Unauthorized", message: "Invalid token" });
         }

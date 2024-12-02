@@ -1,27 +1,34 @@
-import * as React from 'react';
-import { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator, useColorScheme } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
-import * as Crypto from 'expo-crypto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
-import { baseUrl } from '@/src/utils/authUtils';
+import * as React from "react";
+import { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+  useColorScheme,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useTheme } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
+import { baseUrl } from "@/src/utils/authUtils";
 
 export default function AuthScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const colorScheme = useColorScheme();
   const [isLogin, setIsLogin] = useState(true);
-  const [userid, setUserId] = useState("");
-  const [pas, setPassword] = useState('');
+  const [pas, setPassword] = useState("");
   const [phoneNo, setPhoneNumber] = useState("");
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
-  const userIdInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
   const phoneNumberInputRef = useRef<TextInput>(null);
   const nameInputRef = useRef<TextInput>(null);
@@ -34,17 +41,10 @@ export default function AuthScreen() {
     }
 
     try {
-      let deviceUUID = await AsyncStorage.getItem('deviceUUID');
-      if (!deviceUUID) {
-        deviceUUID = await Crypto.randomUUID();
-        await AsyncStorage.setItem('deviceUUID', deviceUUID);
-      }
-
       const body = JSON.stringify({
-        userid,
-        pas,
-        phoneNo: isLogin ? undefined : phoneNo,
         name: isLogin ? undefined : name,
+        phoneNo: isLogin,
+        pas,
       });
 
       const endpoint = isLogin ? "login" : "signup";
@@ -53,6 +53,7 @@ export default function AuthScreen() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: body,
       });
 
@@ -61,11 +62,11 @@ export default function AuthScreen() {
       if (!response.ok) {
         Alert.alert(
           "Error",
-          data.message || 'An error occurred',
+          data.message || "An error occurred",
           [{ text: "OK" }],
           { cancelable: false }
         );
-        throw new Error(data.message || 'An error occurred');
+        throw new Error(data.message || "An error occurred");
       }
 
       if (!isLogin) {
@@ -83,18 +84,22 @@ export default function AuthScreen() {
       // Login process
       if (data.token) {
         try {
-          await AsyncStorage.setItem('userToken', data.token);
-          await AsyncStorage.setItem('isLoggedIn', 'true');
+          await AsyncStorage.setItem("userToken", data.token);
+          await AsyncStorage.setItem("isLoggedIn", "true");
           if (data.loginTime) {
-            await AsyncStorage.setItem('loginTime', data.loginTime);
+            await AsyncStorage.setItem("loginTime", data.loginTime);
           }
           if (data.user) {
-            await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+            await AsyncStorage.setItem("userData", JSON.stringify(data.user));
           }
-          router.replace('/');
+          router.replace("/");
         } catch (storageError) {
-          console.error('Error saving to AsyncStorage:', storageError);
-          Alert.alert("Storage Error", "Failed to save user data. Please try again.", [{ text: "OK" }]);
+          console.error("Error saving to AsyncStorage:", storageError);
+          Alert.alert(
+            "Storage Error",
+            "Failed to save user data. Please try again.",
+            [{ text: "OK" }]
+          );
         }
       } else {
         Alert.alert(
@@ -107,7 +112,10 @@ export default function AuthScreen() {
     } catch (error) {
       Alert.alert(
         "Authentication Error",
-        (error instanceof Error ? error.message : String(error)) || (isLogin ? "Login failed. Please try again." : "Signup failed. Please try again."),
+        (error instanceof Error ? error.message : String(error)) ||
+          (isLogin
+            ? "Login failed. Please try again."
+            : "Signup failed. Please try again."),
         [{ text: "OK" }],
         { cancelable: false }
       );
@@ -117,37 +125,21 @@ export default function AuthScreen() {
   };
 
   const validateInputs = () => {
-    if (!userid) {
-      alert("User ID is required.");
-      userIdInputRef.current?.focus();
-      return false;
-    }
-    if (!pas) {
-      alert("Password is required.");
-      passwordInputRef.current?.focus();
-      return false;
-    }
     if (!isLogin) {
-      if (!phoneNo) {
-        alert("Phone number is required.");
-        phoneNumberInputRef.current?.focus();
-        return false;
-      }
       if (!name) {
         alert("Name is required.");
         nameInputRef.current?.focus();
         return false;
       }
     }
-    // Check if User ID is alphanumeric (contains only letters and numbers)
-    const isValidUserId = /^[a-zA-Z0-9]+$/; // Example: "johnDoe123" is valid, "!@#$" is not
-    if (!isValidUserId.test(userid)) {
-      Alert.alert(
-        "Enter Correct Details",
-        "Invalid User ID format. User ID should only contain letters and numbers.",
-        [{ text: "Okay", onPress: () => userIdInputRef.current?.focus() }],
-        { cancelable: false }
-      );
+    if (!phoneNo) {
+      alert("Phone number is required.");
+      phoneNumberInputRef.current?.focus();
+      return false;
+    }
+    if (!pas) {
+      alert("Password is required.");
+      passwordInputRef.current?.focus();
       return false;
     }
 
@@ -179,40 +171,81 @@ export default function AuthScreen() {
 
   return (
     <View style={[styles.container, styles.main]}>
-      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={styles.scrollViewContent}
+      >
         <View style={styles.formContainer}>
           <View style={{ height: 60 }} />
-          <Text style={[styles.title, { color: colors.text }]}>{isLogin ? 'Login' : 'Sign Up'}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>
+            {isLogin ? "Login" : "Sign Up"}
+          </Text>
 
           <View style={styles.section}>
+            {!isLogin && (
+              <View style={styles.inputContainer}>
+                <Text style={{ color: colors.text }}>Name:</Text>
+                <TextInput
+                  ref={nameInputRef}
+                  style={[
+                    styles.input,
+                    { color: colorScheme === "dark" ? "#ECEDEE" : "#11181C" },
+                  ]}
+                  placeholder="Enter your name"
+                  placeholderTextColor={
+                    colorScheme === "dark" ? "#9BA1A6" : "#687076"
+                  }
+                  value={name}
+                  onChangeText={setName}
+                  returnKeyType="next"
+                  onSubmitEditing={() => handleAuth}
+                  blurOnSubmit={true}
+                />
+              </View>
+            )}
             <View style={styles.inputContainer}>
-              <Text style={{ color: colors.text }}>User ID:</Text>
+              <Text style={{ color: colors.text }}>Phone Number:</Text>
               <TextInput
-                ref={userIdInputRef}
-                style={[styles.input, { color: colorScheme === 'dark' ? '#ECEDEE' : '#11181C' }]}
-                placeholder="Enter user ID"
-                placeholderTextColor={colorScheme === 'dark' ? '#9BA1A6' : '#687076'}
-                value={userid}
-                onChangeText={setUserId}
+                ref={phoneNumberInputRef}
+                style={[
+                  styles.input,
+                  { color: colorScheme === "dark" ? "#ECEDEE" : "#11181C" },
+                ]}
+                placeholder="Enter phone number"
+                placeholderTextColor={
+                  colorScheme === "dark" ? "#9BA1A6" : "#687076"
+                }
+                value={phoneNo}
+                onChangeText={setPhoneNumber}
+                keyboardType="phone-pad"
                 returnKeyType="next"
-                onSubmitEditing={() => passwordInputRef.current?.focus()}
+                onSubmitEditing={() => nameInputRef.current?.focus()}
                 blurOnSubmit={false}
               />
             </View>
-
             <View style={styles.inputContainer}>
               <Text style={{ color: colors.text }}>Password:</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   ref={passwordInputRef}
-                  style={[styles.input, styles.passwordInput, { color: colorScheme === 'dark' ? '#ECEDEE' : '#11181C' }]}
+                  style={[
+                    styles.input,
+                    styles.passwordInput,
+                    { color: colorScheme === "dark" ? "#ECEDEE" : "#11181C" },
+                  ]}
                   placeholder="Enter password"
-                  placeholderTextColor={colorScheme === 'dark' ? '#9BA1A6' : '#687076'}
+                  placeholderTextColor={
+                    colorScheme === "dark" ? "#9BA1A6" : "#687076"
+                  }
                   value={pas}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                   returnKeyType={isLogin ? "done" : "next"}
-                  onSubmitEditing={() => isLogin ? handleAuth() : phoneNumberInputRef.current?.focus()}
+                  onSubmitEditing={() =>
+                    isLogin
+                      ? handleAuth()
+                      : phoneNumberInputRef.current?.focus()
+                  }
                   blurOnSubmit={isLogin}
                 />
                 <TouchableOpacity
@@ -220,55 +253,19 @@ export default function AuthScreen() {
                   onPress={() => setShowPassword(!showPassword)}
                 >
                   <Ionicons
-                    name={showPassword ? 'eye-off' : 'eye'}
+                    name={showPassword ? "eye-off" : "eye"}
                     size={24}
-                    color={colorScheme === 'dark' ? '#9BA1A6' : '#687076'}
+                    color={colorScheme === "dark" ? "#9BA1A6" : "#687076"}
                   />
                 </TouchableOpacity>
               </View>
             </View>
-
-            {!isLogin && (
-              <>
-                <View style={styles.inputContainer}>
-                  <Text style={{ color: colors.text }}>Phone Number:</Text>
-                  <TextInput
-                    ref={phoneNumberInputRef}
-                    style={[styles.input, { color: colorScheme === 'dark' ? '#ECEDEE' : '#11181C' }]}
-                    placeholder="Enter phone number"
-                    placeholderTextColor={colorScheme === 'dark' ? '#9BA1A6' : '#687076'}
-                    value={phoneNo}
-                    onChangeText={setPhoneNumber}
-                    keyboardType="phone-pad"
-                    returnKeyType="next"
-                    onSubmitEditing={() => nameInputRef.current?.focus()}
-                    blurOnSubmit={false}
-                  />
-                </View>
-
-                <View style={styles.inputContainer}>
-                  <Text style={{ color: colors.text }}>Name:</Text>
-                  <TextInput
-                    ref={nameInputRef}
-                    style={[styles.input, { color: colorScheme === 'dark' ? '#ECEDEE' : '#11181C' }]}
-                    placeholder="Enter your name"
-                    placeholderTextColor={colorScheme === 'dark' ? '#9BA1A6' : '#687076'}
-                    value={name}
-                    onChangeText={setName}
-                    returnKeyType="next"
-                    onSubmitEditing={() => handleAuth}
-                    blurOnSubmit={true}
-                  />
-                </View>
-              </>
-            )}
           </View>
 
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleAuth}
-          >
-            <Text style={styles.submitButtonText}>{isLogin ? 'Login' : 'Sign Up'}</Text>
+          <TouchableOpacity style={styles.submitButton} onPress={handleAuth}>
+            <Text style={styles.submitButtonText}>
+              {isLogin ? "Login" : "Sign Up"}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -276,7 +273,9 @@ export default function AuthScreen() {
             onPress={() => setIsLogin(!isLogin)}
           >
             <Text style={styles.switchButtonText}>
-              {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
+              {isLogin
+                ? "Need an account? Sign Up"
+                : "Already have an account? Login"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -292,7 +291,7 @@ export default function AuthScreen() {
 
 const styles = StyleSheet.create({
   main: {
-    backgroundColor: 'dark',
+    backgroundColor: "dark",
   },
   container: {
     flex: 1,
@@ -306,9 +305,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   section: {
     marginBottom: 8,
@@ -318,48 +317,48 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 4,
     padding: 8,
     marginTop: 4,
   },
   submitButton: {
-    backgroundColor: '#0a7ea4',
+    backgroundColor: "#0a7ea4",
     padding: 16,
     borderRadius: 4,
-    alignItems: 'center',
+    alignItems: "center",
   },
   submitButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   switchButton: {
     marginTop: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   switchButtonText: {
-    color: '#0a7ea4',
+    color: "#0a7ea4",
   },
   loaderContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   passwordInput: {
     flex: 1,
   },
   eyeButton: {
     padding: 10,
-    position: 'absolute',
+    position: "absolute",
     right: 0,
   },
 });
