@@ -6,6 +6,7 @@ const createRateLimiter = require('../middleware/rateLimiter');
 
 // Create a single receipt
 router.post("/create", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 }), authMiddleware(["recipient", "admin"]), async (req, res) => {
+    console.log(req.body)
     try {
         const receipt = new Receipt(req.body);
         await receipt.save();
@@ -17,6 +18,7 @@ router.post("/create", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 }), 
         res.status(201).json({ title: 'Success', message: "Receipt created successfully", receipt: responseReceipt });
     } catch (error) {
         res.status(400).json({ title: 'Failure', error: error.message });
+        console.log(error)
     }
 });
 

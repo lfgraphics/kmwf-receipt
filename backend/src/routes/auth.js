@@ -22,9 +22,9 @@ router.post("/signup", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 3 }), 
 });
 
 // Login
-router.post("/login", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 3 }), async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
-    const { phoneNo, pas } = req.body;
+    const { phoneNo, pas, isWeb } = req.body;
     const user = await User.findOne({ phoneNo });
     if (!user) throw new Error("User not found");
 
@@ -39,7 +39,6 @@ router.post("/login", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 3 }), a
     }
 
     const token = jwt.sign({ id: user._id, role: user.role }, SECRET_KEY, { expiresIn: "7d" });
-    const refreshToken = jwt.sign({ id: user._id, role: user.role }, REFRESH_SECRET_KEY, { expiresIn: "90d" });
 
     res.cookie("authToken", token, {
       httpOnly: true,
@@ -47,18 +46,12 @@ router.post("/login", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 3 }), a
       sameSite: 'None',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-      maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
-    });
 
     const userData = user.toObject();
     delete userData.pas;
     delete userData.__v;
 
-    res.json({ title: "Success", user: userData, role: user.role });
+    res.json({ title: "Success", user: userData, role: user.role, ...(!isWeb && { token }) });
   } catch (error) {
     res.status(400).json({ title: "Error", message: error.message });
   }
@@ -66,13 +59,15 @@ router.post("/login", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 3 }), a
 
 router.post("/verify-token", createRateLimiter({ windowMs: 5 * 60 * 1000, max: 7 }), async (req, res) => {
   try {
-    const token = req.cookies.authToken;
+    console.log(req.cookies)
+    const token = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
     if (!token) throw new Error("No token provided");
 
     const decoded = jwt.verify(token, SECRET_KEY);
     res.json({ valid: true, user: decoded });
   } catch (error) {
     res.status(401).json({ valid: false, message: "Invalid or expired token" });
+    console.log(error)
   }
 });
 

@@ -1,4 +1,5 @@
 export interface ReceiptDetails {
+  _id?:string;
   name: string;
   mobile: string;
   address: string;
@@ -9,7 +10,6 @@ export interface ReceiptDetails {
   paymentProof?: string | null;
   usoolKuninda: {
     name: string;
-    userid: string;
     phoneNo: string;
   };
   createdAt?: Date;

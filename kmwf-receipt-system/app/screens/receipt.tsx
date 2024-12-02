@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import { ReceiptDetails, UserData } from "@/src/types";
@@ -24,6 +25,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { baseUrl } from "@/src/utils/authUtils";
 import { compressImage, formatDate } from "@/src/utils";
+import Receipt from "@/components/Receipt";
 
 export default function App() {
   // declare state variables---->
@@ -94,7 +96,6 @@ export default function App() {
       paymentProof,
       usoolKuninda: {
         name: userData.name,
-        userid: userData.userid,
         phoneNo: userData.phoneNo,
       },
     };
@@ -104,6 +105,7 @@ export default function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
         },
         credentials: "include", // Send cookies
         body: JSON.stringify(formData),
@@ -416,9 +418,7 @@ export default function App() {
             <Text style={{ color: colors.text }}>Close</Text>
           </TouchableOpacity>
           {responseData && (
-            <Text style={{ color: colors.text }}>
-              Created at: {formatDate(String(responseData.createdAt))}
-            </Text>
+          <Receipt responseData={responseData} />
           )}
         </View>
       </Modal>

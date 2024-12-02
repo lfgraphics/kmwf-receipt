@@ -43,7 +43,7 @@ export default function AuthScreen() {
     try {
       const body = JSON.stringify({
         name: isLogin ? undefined : name,
-        phoneNo: isLogin,
+        phoneNo,
         pas,
       });
 

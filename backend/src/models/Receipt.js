@@ -17,7 +17,7 @@ const ReceiptSchema = new mongoose.Schema({
     },
     usoolKuninda: {
         name: { type: String, required: true },
-        userid: { type: String, required: true },
+        id: { type: mongoose.Schema.Types.ObjectId },
         phoneNo: { type: String, required: true },
     },
     createdAt: { type: Date, default: () => moment().tz("Asia/Kolkata").toDate() },

@@ -29,9 +29,9 @@ const App = () => {
 
   const { colors } = useTheme();
 
-  useEffect(() => {
-    checkUserLoggedIn();
-  }, []);
+  // useEffect(() => {
+  //   checkUserLoggedIn();
+  // }, []);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -41,10 +41,10 @@ const App = () => {
           setUserData(JSON.parse(userDataString));
         }
 
-        if (!checkUserLoggedIn) {
-          router.replace("/auth" as any);
-          return;
-        }
+        // if (!checkUserLoggedIn) {
+        //   router.replace("/auth" as any);
+        //   return;
+        // }
       } catch (error) {
         console.error("Error initializing app:", error);
         setError(
