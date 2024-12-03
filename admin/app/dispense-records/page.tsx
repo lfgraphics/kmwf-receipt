@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { DispensesRecord } from "@/types";
+import { ReceiptDetails } from "@/types";
 import {
     Table,
     TableBody,
@@ -36,7 +36,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { formatDate } from "@/lib/utils";
 
 const VehicleDispensesPage = () => {
-    const [records, setRecords] = useState<DispensesRecord[]>([]);
+    const [records, setRecords] = useState<ReceiptDetails[]>([]);
     const [totalPages, setTotalPages] = useState(1);
     const [totalRecords, setTotalRecords] = useState();
     const [currentPage, setCurrentPage] = useState(1);
@@ -73,20 +73,15 @@ const VehicleDispensesPage = () => {
     const fetchRecords = async () => {
         setLoading(true);
         try {
-            const response = await axios.get("https://bowser-backend-2cdr.onrender.com/listDispenses", { //https://bowser-backend-2cdr.onrender.com
-                params: {
-                    page: currentPage,
-                    limit: limit,
-                    sortBy,
-                    order,
-                    bowserNumber: filter.bowserNumber,
-                    driverName: filter.driverName,
-                    tripSheetId: filter.tripSheetId,
-                    vehicleNo: filter.vehicleNo,
-                    verified: verificationStatus,
-                    category,
-                },
-            });
+           const response = await axios.get("http://localhost:4000/receipts", {
+             params: {
+               page: currentPage,
+               limit: limit,
+            //    sortBy,
+            //    order,
+             },
+             withCredentials: true, // Include cookies in the request
+           });
 
             setRecords(response.data.records);
             setTotalPages(response.data.totalPages);
@@ -97,137 +92,6 @@ const VehicleDispensesPage = () => {
             alert(error);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const exportToExcel = async () => {
-        setLoading(true);
-        try {
-            const date = new Date();
-            const options: Intl.DateTimeFormatOptions = {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-                timeZone: 'Asia/Kolkata',
-            };
-            const timestamp: string = date.toLocaleDateString('en-IN', options);
-
-            // const dateFilter = getBackendDateFilter(); // Function to get the date range filter
-
-            // // Construct date description if date range is provided
-            // const dateDescription = dateFilter
-            //     ? `Date-${new Date(dateFilter.fuelingDateTime.$gte).toLocaleDateString()} to ${new Date(dateFilter.fuelingDateTime.$lte).toLocaleDateString()} ,`
-            //     : '';
-            const filterDescription = `${filter.bowserNumber ? `Bowser-${filter.bowserNumber} ,` : ''}${filter.driverName ? `Driver-${filter.driverName} ,` : ''}${filter.tripSheetId ? `Trip Sheet-${filter.tripSheetId} ,` : ''}`; //${selectedDateRange != undefined && dateDescription}`;
-            const filename = `Dispenses_data ${filterDescription} ${records.length}record${records.length > 1 ? "s" : ""}, downloaded at ${timestamp}.xlsx`;
-
-            const response = await axios.get("https://bowser-backend-2cdr.onrender.com/listDispenses/export/excel", {
-                params: {
-                    bowserNumber: filter.bowserNumber,
-                    driverName: filter.driverName,
-                    tripSheetId: filter.tripSheetId,
-                    sortBy,
-                    order,
-                    limit,
-                    // startDate: dateFilter?.fuelingDateTime.$gte, // Add startDate
-                    // endDate: dateFilter?.fuelingDateTime.$lte, // Add endDate
-                },
-                responseType: "blob",
-            });
-
-            // Create a URL for the Blob and trigger the download
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", filename); // Use the generated filename
-            document.body.appendChild(link);
-            link.click();
-            link.remove(); // Clean up the link element
-        } catch (error) {
-            console.error("Error exporting data:", error);
-            alert("Error exporting data.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Function to toggle selection of a row
-    const toggleRowSelection = (id: string) => {
-        setSelectedRows((prev) => {
-            const newSelectedRows = new Set(prev);
-            if (newSelectedRows.has(id)) {
-                newSelectedRows.delete(id); // Deselect if already selected
-            } else {
-                newSelectedRows.add(id); // Select if not selected
-            }
-            return newSelectedRows;
-        });
-    };
-    const toggleSelectAll = async () => {
-        if (selectAll) {
-            setSelectedRows(new Set()); // Deselect all
-        } else {
-            const allRowIds = new Set(records.map(record => record._id.toString())); // Create a set of all row IDs
-            setSelectedRows(allRowIds); // Select all
-        }
-        setSelectAll(!selectAll); // Toggle the select all state
-    };
-
-    const verifyOne = async (id: string) => {
-        try {
-            let response = await axios.patch(`${BASE_URL}/listDispenses/verify/${id}`)
-            if (response.status == 200) {
-                setRecords((prevRecords) =>
-                    prevRecords.map((record) =>
-                        record._id === id ? { ...record, verified: true } : record
-                    )
-                );
-                toast({ title: response.data.heading, description: response.data.message, variant: "success" });
-            }
-        } catch (err) {
-            if (err instanceof Error) {
-                toast({ title: "Error", description: err.message, variant: "destructive" });
-            } else {
-                toast({ title: "Error", description: "An unknown error occurred", variant: "destructive" });
-            }
-        }
-    }
-
-    const verifyMultiple = async () => {
-        if (selectedRows.size === 0) {
-            return;
-        }
-
-        const idsToVerify = Array.from(selectedRows).filter((id) => {
-            const record = records.find((r) => r._id === id);
-            return record && !record.verified;
-        });
-
-        if (idsToVerify.length === 0) {
-            alert('no data to verify')
-            return;
-        }
-
-        try {
-            let response = await axios.post(`${BASE_URL}/listDispenses/verify/`, { ids: idsToVerify });
-            if (response.status === 200) {
-                setRecords((prevRecords) =>
-                    prevRecords.map((record) =>
-                        idsToVerify.includes(record._id) ? { ...record, verified: true } : record
-                    )
-                );
-                toast({ title: response.data.heading, description: response.data.message, variant: "success" });
-            }
-        } catch (err) {
-            if (err instanceof Error) {
-                toast({ title: "Error", description: err.message, variant: "destructive" });
-            } else {
-                toast({ title: "Error", description: "An unknown error occurred", variant: "destructive" });
-            }
         }
     };
 
@@ -335,18 +199,6 @@ const VehicleDispensesPage = () => {
                         />
                     </div>
                     <div className="flex items-center justify-between text-muted-foreground font-[200]">{records.length} out of {totalRecords} records </div>
-                    <Button variant="outline" onClick={toggleSelectAll}>
-                        {selectAll ? <ListX size={32} /> : <ListChecks size={32} />}
-                    </Button>
-                    <Button disabled={!(selectedRows.size > 0)} variant="outline" onClick={verifyMultiple}>
-                        Verify Selected Records
-                    </Button>
-                    <Button disabled variant="outline" onClick={verifyMultiple}>
-                        Post to tally
-                    </Button>
-                    <Button onClick={exportToExcel} className="w-full sm:w-auto">
-                        Export to Excel
-                    </Button>
                 </div>
             </div>
             <Accordion type="single" collapsible className="block lg:hidden smallScreen bg-background z-10 top-0 py-2">
@@ -445,9 +297,6 @@ const VehicleDispensesPage = () => {
                             />
                             <div className="flex items-center justify-between min-w-[200px] max-w-full">Records limit <Input type="number" className="w-20" value={limit} onChange={(e) => setLimit(Number(e.target.value))}></Input> </div>
                             <div className="flex items-center justify-between text-gray-300 font-[200]">Total found record{records.length > 1 ? "s" : ""} {records.length} out of {totalRecords} records </div>
-                            <Button onClick={exportToExcel} className="w-full sm:w-auto">
-                                Export to Excel
-                            </Button>
                         </div>
                     </AccordionContent>
                 </AccordionItem>
@@ -457,48 +306,38 @@ const VehicleDispensesPage = () => {
                 <TableHeader>
                     <TableRow>
                         <TableHead>S N</TableHead>
-                        <TableHead>Trip Sheet Id</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Party/Vendor</TableHead>
-                        <TableHead>Fueling Time</TableHead>
-                        <TableHead>Bowser No.</TableHead>
-                        <TableHead>Bowser Location</TableHead>
-                        <TableHead>Driver/Manager</TableHead>
+                        <TableHead>Receipt No</TableHead>
+                        <TableHead>Mode</TableHead>
+                        <TableHead>Mad</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>in Words</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Addres</TableHead>
+                        <TableHead>Name</TableHead>
                         <TableHead>Phone No.</TableHead>
-                        <TableHead>Vehicle Number</TableHead>
-                        <TableHead>Odo Meter</TableHead>
-                        <TableHead>Qty Type</TableHead>
-                        <TableHead>Fuel Qty</TableHead>
-                        <TableHead>Action</TableHead>
-                        <TableHead>Verified</TableHead>
-                        <TableHead>Posted</TableHead>
+                        <TableHead>Usool Kuninda</TableHead>
+                        <TableHead>WK Mo.</TableHead>
+                        <TableHead>View More</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody className="h-[50%] overflow-y-scroll">
                     {records.length > 0 && records.map((record, index) => (
                         <TableRow
                             key={index}
-                            onClick={(e: React.MouseEvent<HTMLElement>) => {
-                                const target = e.target as HTMLElement;
-                                if (target.tagName !== 'BUTTON') {
-                                    toggleRowSelection(`${record._id}`);
-                                }
-                            }}
                             className={selectedRows.has(`${record._id}`) ? "bg-blue-200 hover:bg-blue-100 text-black" : ""}
                         >
                             <TableCell>{index + 1}</TableCell>
-                            <TableCell>{record.tripSheetId}</TableCell>
-                            <TableCell>{record.category}</TableCell>
-                            <TableCell>{record.party}</TableCell>
-                            <TableCell>{`${formatDate(record.fuelingDateTime)}`}</TableCell>
-                            <TableCell>{record.bowser.regNo}</TableCell>
-                            <TableCell>{record.gpsLocation?.substring(0, 15) + "..."}</TableCell>
-                            <TableCell>{record.driverName}</TableCell>
-                            <TableCell>{record.driverMobile}</TableCell>
-                            <TableCell>{record.vehicleNumber}</TableCell>
-                            <TableCell>{record.odometer}</TableCell>
-                            <TableCell>{record.quantityType}</TableCell>
-                            <TableCell>{record.fuelQuantity}</TableCell>
+                            <TableCell>{record.receiptNumber}</TableCell>
+                            <TableCell>{record.modeOfPayment}</TableCell>
+                            <TableCell>{record.mad}</TableCell>
+                            <TableCell>{record.amount}</TableCell>
+                            <TableCell>{record.amountInWords}</TableCell>
+                            <TableCell>{`${formatDate(record.createdAt!)}`}</TableCell>
+                            <TableCell>{record.address?.substring(0, 15) + "..."}</TableCell>
+                            <TableCell>{record.name}</TableCell>
+                            <TableCell>{record.mobile}</TableCell>
+                            <TableCell>{record.usoolKuninda.name}</TableCell>
+                            <TableCell>{record.usoolKuninda.phoneNo}</TableCell>
                             <TableCell className="flex gap-2 items-center">
                                 <Link href={`/dispense-records/${record._id}`}>
                                     <Button variant={selectedRows.has(`${record._id}`) ? "secondary" : "outline"} size="sm">
@@ -506,18 +345,14 @@ const VehicleDispensesPage = () => {
                                     </Button>
                                 </Link>
                             </TableCell>
-                            <TableCell>{record.verified ? <Check /> : <Button onClick={() => { verifyOne(String(record._id)) }} variant={selectedRows.has(`${record._id}`) ? "secondary" : "outline"}>Verify</Button>}</TableCell>
-                            {/* <X /> */}
-                            <TableCell>{record.posted ? <Check /> : <Button disabled onClick={() => { verifyOne(String(record._id)) }} variant={selectedRows.has(`${record._id}`) ? "secondary" : "outline"}>Post</Button>}</TableCell>
-                        </TableRow>
+                           </TableRow>
                     ))}
                     {/* Calculate total fuel quantity if filtered by tripSheetId */}
                     <TableRow>
-                        <TableCell colSpan={12} className="text-right font-bold">Total Fuel Quantity:</TableCell>
-                        <TableCell colSpan={2}>
-                            {records.reduce((total, record) => total + Number(record.fuelQuantity), 0).toFixed(2)} L
+                        <TableCell colSpan={4} className="text-right font-bold">Total:</TableCell>
+                        <TableCell colSpan={9}>
+                            ₹ {records.reduce((total, record) => total + Number(record.amount), 0).toFixed(2)}
                         </TableCell>
-                        <TableCell colSpan={2} className="text-right font-bold"></TableCell>
                     </TableRow>
                 </TableBody>
                 <TableCaption>

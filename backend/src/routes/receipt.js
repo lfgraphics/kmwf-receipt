@@ -43,7 +43,7 @@ router.get("/:id", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 20 }), aut
 });
 
 // Get all receipts
-router.get("/", createRateLimiter({ windowMs: 10 * 60 * 1000, max: 20 }), authMiddleware(["recipient", "admin"]), async (req, res) => {
+router.get("/", createRateLimiter({ windowMs: 10 * 60 * 1000, max: 20 }), authMiddleware(["tester", "admin"]), async (req, res) => {
     try {
         const { usoolKuninda, startDate, endDate, name, mobile, address, mad, subsType, modeOfPayment } = req.query;
 
@@ -84,7 +84,6 @@ router.get("/", createRateLimiter({ windowMs: 10 * 60 * 1000, max: 20 }), authMi
         res.status(400).json({ title: "Failure", error: error.message });
     }
 });
-
 
 // Update a single receipt by ID
 router.patch("/:id", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 15 }), authMiddleware(["admin"]), async (req, res) => {

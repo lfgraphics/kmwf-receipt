@@ -1,16 +1,16 @@
 import axios from "axios";
 import { User, LoginResponse, SignupResponse } from "../types/auth";
 
-export const API_URL = "https://kmwf-receipt-system.onrender.com";
+export const API_URL = "http://localhost:4000"; //https://kmwf-receipt-system.onrender.com
 
 export async function login(
-  phoneNumber: string,
-  password: string
+  phoneNo: string,
+  pas: string
 ): Promise<LoginResponse> {
   try {
     const response = await axios.post<LoginResponse>(
       `${API_URL}/auth/login`,
-      { phoneNumber, password, isWeb: true }, // Add `isWeb` to signal web client
+      { phoneNo, pas, isWeb: true }, // Add `isWeb` to signal web client
       { withCredentials: true } // Include cookies in requests
     );
 
@@ -46,7 +46,7 @@ export function getCurrentUser(): User | null {
 }
 
 export async function signup(userData: {
-  password: string;
+  pas: string;
   name: string;
   phoneNo: string;
 }): Promise<SignupResponse> {

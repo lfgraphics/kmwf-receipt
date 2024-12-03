@@ -6,13 +6,22 @@ const SECRET_KEY = process.env.JWT_SECRET;
 const authMiddleware = (allowedRoles = []) => {
     return (req, res, next) => {
         try {
-            // Extract the token from the Authorization header
+            let token;
+            // Check for the token in the Authorization header
             const authHeader = req.headers.authorization;
-            if (!authHeader || !authHeader.startsWith("Bearer ")) {
-                return res.status(401).json({ title: "Unauthorized", message: "No token provided" });
+            if (authHeader && authHeader.startsWith("Bearer ")) {
+                token = authHeader.split(" ")[1];
             }
 
-            const token = authHeader.split(" ")[1];
+            // If no token is found in the header, check the cookies
+            if (!token && req.cookies) {
+                token = req.cookies.authToken; // Replace "authToken" with the name of your cookie
+            }
+
+            // If still no token is found, return an unauthorized response
+            if (!token) {
+                return res.status(401).json({ title: "Unauthorized", message: "No token provided" });
+            }
 
             // Verify the token
             const decoded = jwt.verify(token, SECRET_KEY);

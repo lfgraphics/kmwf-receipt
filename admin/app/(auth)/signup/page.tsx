@@ -24,7 +24,7 @@ interface PasswordStrength {
 }
 
 export default function Signup() {
-  const [password, setPassword] = useState<string>("");
+  const [pas, setPas] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [phoneNo, setPhoneNo] = useState<string>("");
   const [passwordStrength, setPasswordStrength] =
@@ -63,7 +63,7 @@ export default function Signup() {
       return;
     }
     try {
-      await signup({ password, name, phoneNo });
+      await signup({ pas, name, phoneNo });
       alert(
         "Signup successful. Your account has been created. Please wait for admin verification."
       );
@@ -127,9 +127,9 @@ export default function Signup() {
                   id="password"
                   type="password"
                   placeholder="Enter your password"
-                  value={password}
+                  value={pas}
                   onChange={(e) => {
-                    setPassword(e.target.value);
+                    setPas(e.target.value);
                     handlePsswordStrenght(e.target.value);
                   }}
                   required

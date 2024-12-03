@@ -10,23 +10,27 @@ const SECRET_KEY = process.env.JWT_SECRET;
 
 // Register
 router.post("/signup", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 3 }), async (req, res) => {
-  const { userid, name, pas, phoneNo, role } = req.body;
+  const { name, pas, phoneNo, } = req.body;
   try {
     const hashedPassword = await argon2.hash(pas);
-    const user = new User({ userid, name, phoneNo, pas: hashedPassword, role });
+    const user = new User({ name, phoneNo, pas: hashedPassword, role:"user" });
     await user.save();
     res.status(201).json({ heading: "Success", message: "User registered successfully!" });
   } catch (error) {
+    console.error(error)
     res.status(400).json({ heading: "Failure", error: error.message });
   }
 });
 
 // Login
 router.post("/login", async (req, res) => {
+  console.log("hit")
   try {
     const { phoneNo, pas, isWeb } = req.body;
     const user = await User.findOne({ phoneNo });
     if (!user) throw new Error("User not found");
+
+    console.log(user)
 
     const isMatch = await argon2.verify(user.pas, pas);
     if (!isMatch) throw new Error("Invalid password");
@@ -42,8 +46,9 @@ router.post("/login", async (req, res) => {
 
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-      sameSite: 'None',
+      secure: process.env.NODE_ENV === "production" && req.secure, // Only use `secure` in production
+      sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax', // Use 'Lax' for local development
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -53,6 +58,7 @@ router.post("/login", async (req, res) => {
 
     res.json({ title: "Success", user: userData, role: user.role, ...(!isWeb && { token }) });
   } catch (error) {
+    console.error(error)
     res.status(400).json({ title: "Error", message: error.message });
   }
 });

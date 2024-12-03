@@ -147,38 +147,23 @@ export interface Vehicle {
     driverDetails: Driver
 }
 
-export interface DispensesRecord {
-    _id: string;
-    orderId: mongoose.Schema.Types.ObjectId,
-    category: string;
-    party: string;
-    tripSheetId: string;
-    vehicleNumberPlateImage: string,
-    vehicleNumber: string,
-    odometer: string,
-    driverName: string,
-    driverId: string,
-    driverMobile: string,
-    fuelMeterImage: string[],
-    slipImage: string,
-    fuelQuantity: string,
-    quantityType: string,
-    gpsLocation: string,
-    fuelingDateTime: string,
-    verified: boolean,
-    posted: boolean,
-    bowser: {
-        regNo: string,
-        driver: {
-            name: string,
-            id: string
-            phoneNo: string
-        }
-    },
-    allocationAdmin: {
-        name: { type: string, required: false },
-        userId: { type: string, required: false }
-    },
+export interface ReceiptDetails {
+  _id?: string;
+  name: string;
+  mobile: string;
+  address: string;
+  amount: number;
+  amountInWords: string;
+  mad: "Zakat" | "Sadqa";
+  subsType: "Mahana" | "Salana";
+  modeOfPayment: "Online" | "Cash";
+  paymentProof?: string | null;
+  usoolKuninda: {
+    name: string;
+    phoneNo: string;
+  };
+  createdAt?: Date;
+  receiptNumber?: number;
 }
 
 
