@@ -38,6 +38,7 @@ export default function App() {
   const [mobile, setMobile] = useState("");
   const [address, setaddress] = useState("");
   const [amount, setAmount] = useState<number>(0);
+  const [amountInWords, setAmountInWords] = useState("");
   const [subsType, setSubsType] = useState<"Mahana" | "Salana">("Mahana");
   const [mad, setMad] = useState<"Sadqa" | "Zakat">("Sadqa");
   const [modeOfPayment, setModeOfPayment] = useState<"Online" | "Cash">("Cash");
@@ -48,6 +49,7 @@ export default function App() {
   // declare refs for input fields---->
   const nameInputRef = React.useRef<TextInput>(null);
   const amountInputRef = React.useRef<TextInput>(null);
+  const amountInWordsInputRef = React.useRef<TextInput>(null);
   const mobileInputRef = React.useRef<TextInput>(null);
   const addressInputRef = React.useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -90,6 +92,7 @@ export default function App() {
       mobile,
       address,
       amount,
+      amountInWords,
       mad,
       subsType,
       modeOfPayment,
@@ -276,7 +279,24 @@ export default function App() {
                   setAmount(Number(text));
                 }}
                 returnKeyType="next"
-                onSubmitEditing={() => mobileInputRef.current?.focus()}
+                onSubmitEditing={() => amountInWordsInputRef.current?.focus()}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <ThemedText>Amount in Words</ThemedText>
+              <TextInput
+                ref={amountInWordsInputRef}
+                style={[styles.input, { color: colors.text }]}
+                placeholder="Five Thousand only"
+                keyboardType="default"
+                placeholderTextColor={
+                  colorScheme === "dark" ? "#9BA1A6" : "#687076"
+                }
+                value={amountInWords}
+                onChangeText={(text) => {
+                  setAmountInWords(text);
+                }}
+                returnKeyType="next"
               />
             </View>
             <View style={styles.inputContainer}>
@@ -392,6 +412,18 @@ export default function App() {
               <Ionicons name="refresh-outline" size={20} color="white" />
             </View>
           </TouchableOpacity>
+          {responseData && (
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={() => setModalVisible(true)}
+            >
+              <ThemedText
+                style={[styles.resetButtonText, { color: colors.text }]}
+              >
+                Show Receipt
+              </ThemedText>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
       {formSubmitting && (
@@ -417,9 +449,7 @@ export default function App() {
           >
             <Text style={{ color: colors.text }}>Close</Text>
           </TouchableOpacity>
-          {responseData && (
-          <Receipt responseData={responseData} />
-          )}
+          {responseData && <Receipt responseData={responseData} />}
         </View>
       </Modal>
     </View>

@@ -6,6 +6,7 @@ const ReceiptSchema = new mongoose.Schema({
     mobile: { type: String, required: true },
     address: { type: String, required: false },
     amount: { type: Number, required: true },
+    amountInWords: { type: String, required: true },
     mad: { type: String, enum: ["Zakat", "Sadqa"], required: true },
     subsType: { type: String, enum: ["Mahana", "Salana"], required: true },
     modeOfPayment: { type: String, enum: ["Online", "Cash"], required: true },

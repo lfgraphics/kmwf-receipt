@@ -1,9 +1,10 @@
 export interface ReceiptDetails {
-  _id?:string;
+  _id?: string;
   name: string;
   mobile: string;
   address: string;
   amount: number;
+  amountInWords:string;
   mad: "Zakat" | "Sadqa";
   subsType: "Mahana" | "Salana";
   modeOfPayment: "Online" | "Cash";

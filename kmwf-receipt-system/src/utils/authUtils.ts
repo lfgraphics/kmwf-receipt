@@ -1,9 +1,8 @@
 // import { registerForPushNotificationsAsync } from '@/app/utils/notifications';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
 import { Alert } from "react-native";
 
-export const baseUrl = "http://192.168.177.228:4000"; //http://192.168.177.228:4000 // https://kmwf-receipt-system.onrender.com //192.168.177.228
+export const baseUrl = "http://192.168.137.1:4000"; //http://192.168.177.228:4000 // https://kmwf-receipt-system.onrender.com //192.168.177.228 //192.168.137.1
 
 export const checkUserLoggedIn = async () => {
   try {
