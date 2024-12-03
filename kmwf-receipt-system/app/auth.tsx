@@ -110,6 +110,7 @@ export default function AuthScreen() {
         );
       }
     } catch (error) {
+      console.log(error);
       Alert.alert(
         "Authentication Error",
         (error instanceof Error ? error.message : String(error)) ||

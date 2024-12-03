@@ -4,7 +4,7 @@ export interface ReceiptDetails {
   mobile: string;
   address: string;
   amount: number;
-  amountInWords:string;
+  amountInWords: string;
   mad: "Zakat" | "Sadqa";
   subsType: "Mahana" | "Salana";
   modeOfPayment: "Online" | "Cash";
@@ -14,6 +14,7 @@ export interface ReceiptDetails {
     phoneNo: string;
   };
   createdAt?: Date;
+  receiptNumber?:number;
 }
 export interface UserData {
   _id: string;

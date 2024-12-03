@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,29 +7,46 @@ import {
   Button,
   Image,
 } from "react-native";
+import * as MediaLibrary from "expo-media-library";
 import { ReceiptDetails } from "@/src/types";
+// import ViewShot from "react-native-view-shot";
 import { captureRef } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system";
+// import * as FileSystem from "expo-file-system";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import * as Print from "expo-print";
 
 export const Receipt = ({ responseData }: { responseData: ReceiptDetails }) => {
-  const receiptRef = useRef<ImageBackground>(null);
+  // const [status, requestPermission] = MediaLibrary.usePermissions();
+  const receiptRef = useRef<View>(null);
 
   const captureScreenshot = async () => {
+    console.log("Starting screenshot capture");
+
+    if (!receiptRef.current) {
+      console.error("receiptRef is not set. Unable to capture screenshot.");
+      return;
+    }
+
+    console.log("receiptRef is set, proceeding with capture...");
+
     try {
-      // Capture the screenshot
+      // Adding a slight delay to ensure everything is rendered properly
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      console.log("Delay completed, starting capture...");
+
       const uri = await captureRef(receiptRef, {
         format: "png",
         quality: 1,
       });
+
       console.log("Screenshot captured at:", uri);
 
-      // Share the screenshot
       if (await Sharing.isAvailableAsync()) {
+        console.log("Sharing available. Proceeding with sharing...");
         await Sharing.shareAsync(uri);
       } else {
+        console.error("Sharing is not available on this device.");
         alert("Sharing is not available on this device.");
       }
     } catch (error) {
@@ -39,22 +56,18 @@ export const Receipt = ({ responseData }: { responseData: ReceiptDetails }) => {
 
   const saveScreenshot = async () => {
     try {
-      const uri = await captureRef(receiptRef,{result:"data-uri"});
-      console.log(uri);
-      // , {
-      //   format: "png",
-      //   quality: 0.9,
-      // }
-      const newUri = `${FileSystem.documentDirectory}receipt.png`;
-
-      await FileSystem.copyAsync({
-        from: uri,
-        to: newUri,
+      const localUri = await captureRef(receiptRef, {
+        height: 440,
+        width: 300,
+        quality: 1,
       });
 
-      alert(`Receipt saved at: ${newUri}`);
-    } catch (error) {
-      console.error("Error saving screenshot:", error);
+      await MediaLibrary.saveToLibraryAsync(localUri);
+      if (localUri) {
+        alert("Saved!");
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -88,19 +101,21 @@ export const Receipt = ({ responseData }: { responseData: ReceiptDetails }) => {
 
   return (
     <View style={styles.container}>
-      {/* Screenshot Area */}
       <View
         style={styles.receiptContainer}
-        // collapsable={false}
+        collapsable={false}
+        ref={receiptRef}
       >
         <ImageBackground
-          ref={receiptRef}
           source={require("../assets/images/media/receipt.jpg")}
           style={styles.receipt}
         >
           <View style={styles.overlay}>
             <Text style={[styles.text, styles.id]}>{responseData._id}</Text>
             <Text style={[styles.text, styles.name]}>{responseData.name}</Text>
+            <Text style={[styles.text, styles.receiptNumber]}>
+              {responseData.receiptNumber}
+            </Text>
             <Text style={[styles.text, styles.address]}>
               {responseData.address}
             </Text>
@@ -111,7 +126,10 @@ export const Receipt = ({ responseData }: { responseData: ReceiptDetails }) => {
               {responseData.amountInWords}
             </Text>
             <Text style={[styles.text, styles.mad]}>
-              {responseData.mad === "Sadqa" ? "صدقہ" : "زکوۃ"}
+              {responseData.mad === "Sadqa" ? "صدقہ" : "زکوٰۃ"}
+            </Text>
+            <Text style={[styles.text, styles.subsType]}>
+              رکنیت: {responseData.subsType === "Mahana" ? "ماہانہ" : "سالانہ"}
             </Text>
             <Text style={[styles.text, styles.date]}>
               {new Date(responseData.createdAt!).toLocaleDateString()}
@@ -120,9 +138,17 @@ export const Receipt = ({ responseData }: { responseData: ReceiptDetails }) => {
               {responseData.usoolKuninda.name}
             </Text>
             <Image
-              src="https://upload.wikimedia.org/wikipedia/commons/0/00/Todd_Strasser_signature.png"
+              source={{
+                uri: "https://upload.wikimedia.org/wikipedia/commons/0/00/Todd_Strasser_signature.png",
+              }}
+              onError={(e) =>
+                console.error(
+                  "Error loading signature image:",
+                  e.nativeEvent.error
+                )
+              }
               style={styles.signature}
-            ></Image>
+            />
           </View>
         </ImageBackground>
       </View>
@@ -182,6 +208,10 @@ const styles = StyleSheet.create({
     top: 155,
     right: 30,
   },
+  receiptNumber: {
+    top: 131,
+    left: 325,
+  },
   address: {
     top: 185,
     right: 25,
@@ -195,8 +225,12 @@ const styles = StyleSheet.create({
     right: 25,
   },
   mad: {
-    top: 218,
-    left: 150,
+    top: 220,
+    left: 190,
+  },
+  subsType: {
+    top: 220,
+    left: 100,
   },
   date: {
     textAlign: "center",

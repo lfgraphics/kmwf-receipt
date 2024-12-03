@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   Modal,
   Alert,
   ScrollView,
+  Button,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { checkUserLoggedIn } from "../src/utils/authUtils";
@@ -16,6 +17,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { captureRef } from "react-native-view-shot";
+import * as Sharing from "expo-sharing";
+
 
 const App = () => {
   const router = useRouter();
@@ -28,6 +32,40 @@ const App = () => {
   } | null>(null);
 
   const { colors } = useTheme();
+  const receiptRef = useRef<View>(null);
+   const captureScreenshot = async () => {
+     console.log("Starting screenshot capture");
+
+     if (!receiptRef.current) {
+       console.error("receiptRef is not set. Unable to capture screenshot.");
+       return;
+     }
+
+     console.log("receiptRef is set, proceeding with capture...");
+
+     try {
+       // Adding a slight delay to ensure everything is rendered properly
+       await new Promise((resolve) => setTimeout(resolve, 500));
+       console.log("Delay completed, starting capture...");
+
+       const uri = await captureRef(receiptRef, {
+         format: "png",
+         quality: 1,
+       });
+
+       console.log("Screenshot captured at:", uri);
+
+       if (await Sharing.isAvailableAsync()) {
+         console.log("Sharing available. Proceeding with sharing...");
+         await Sharing.shareAsync(uri);
+       } else {
+         console.error("Sharing is not available on this device.");
+         alert("Sharing is not available on this device.");
+       }
+     } catch (error) {
+       console.error("Error capturing screenshot:", error);
+     }
+   };
 
   // useEffect(() => {
   //   checkUserLoggedIn();
@@ -139,6 +177,15 @@ const App = () => {
           <Text style={{ color: "white" }}>Create Receipt</Text>
         </View>
       </Link>
+
+      <View
+        ref={receiptRef}
+        collapsable={false}
+        style={{ height: 100, width: 100, backgroundColor: "blue" }}
+      >
+        <Text>Simple Test Capture</Text>
+      </View>
+      <Button title="Share Receipt" onPress={captureScreenshot} />
 
       <Modal
         animationType="slide"

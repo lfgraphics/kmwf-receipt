@@ -1,7 +1,7 @@
 import axios from "axios";
 import { User, LoginResponse, SignupResponse } from "../types/auth";
 
-const API_URL = "https://kmwf-receipt-system.onrender.com";
+export const API_URL = "https://kmwf-receipt-system.onrender.com";
 
 export async function login(
   phoneNumber: string,
