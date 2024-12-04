@@ -5,7 +5,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const createRateLimiter = require('../middleware/rateLimiter');
 
 // Create a single receipt
-router.post("/create", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 }), authMiddleware(["recipient", "admin"]), async (req, res) => {
+router.post("/create", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 }), authMiddleware(["recipient", "admin", "tester"]), async (req, res) => {
     try {
         const receipt = new Receipt(req.body);
         await receipt.save();
@@ -45,8 +45,10 @@ router.get("/:id", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 20 }), aut
 // Get all receipts
 router.get("/", createRateLimiter({ windowMs: 10 * 60 * 1000, max: 20 }), authMiddleware(["recipient", "admin"]), async (req, res) => {
     try {
-        const { usoolKuninda, startDate, endDate, name, mobile, address, mad, subsType, modeOfPayment } = req.query;
+        const { usoolKuninda, startDate, endDate, name, mobile, address, mad, subsType, modeOfPayment, receiptNumber, page = 1, limit = 20, sortBy = 'receiptNumber', order = 'desc' } = req.query;
 
+        const skip = (page - 1) * limit;
+        const sortOrder = order === 'asc' ? 1 : -1;
         const filters = {
             $and: [],
         };
@@ -55,11 +57,12 @@ router.get("/", createRateLimiter({ windowMs: 10 * 60 * 1000, max: 20 }), authMi
             filters.$and.push({
                 $or: [
                     { "usoolKuninda.name": { $regex: usoolKuninda, $options: "i" } },
-                    { "usoolKuninda.userid": { $regex: usoolKuninda, $options: "i" } },
+                    { "usoolKuninda.phoneNo": { $regex: usoolKuninda, $options: "i" } },
                 ],
             });
         }
 
+        if (receiptNumber) filters.$and.push({ receiptNumber: { $regex: Number(receiptNumber) } });
         if (name) filters.$and.push({ name: { $regex: name, $options: "i" } });
         if (mobile) filters.$and.push({ mobile: { $regex: mobile, $options: "i" } });
         if (address) filters.$and.push({ address: { $regex: address, $options: "i" } });
@@ -77,7 +80,7 @@ router.get("/", createRateLimiter({ windowMs: 10 * 60 * 1000, max: 20 }), authMi
 
         if (filters.$and.length === 0) delete filters.$and;
 
-        const receipts = await Receipt.find(filters).sort({ createdAt: -1 });
+        const receipts = await Receipt.find(filters).select('-paymentProof').skip(skip).limit(Number(limit)).sort({ [sortBy]: sortOrder });
 
         res.status(200).json(receipts);
     } catch (error) {
@@ -85,6 +88,20 @@ router.get("/", createRateLimiter({ windowMs: 10 * 60 * 1000, max: 20 }), authMi
     }
 });
 
+// public route for doners
+router.post('/publicroute', createRateLimiter({ windowMs: 10 * 60 * 1000, max: 2 }), async (req, res) => {
+    const { phoneNo, receiptNumber } = req.body;
+    try {
+        const foundReceipt = await Receipt.findOne({ $and: [{ mobile: { $regex: phoneNo } }, { receiptNumber }] }).select('-__v');
+        if (!foundReceipt) {
+            return res.status(404).json({ title: "Error", message: "Can't find Receipt on your credentials" });
+        }
+        res.status(200).json(foundReceipt);
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({ title: "Error finding requested record", message: `Exact error: ${err}` });
+    }
+});
 
 // Update a single receipt by ID
 router.patch("/:id", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 15 }), authMiddleware(["admin"]), async (req, res) => {

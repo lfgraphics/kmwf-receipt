@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+// import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import { ReceiptDetails, UserData } from "@/src/types";
@@ -25,7 +25,8 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { baseUrl } from "@/src/utils/authUtils";
 import { compressImage, formatDate } from "@/src/utils";
-import Receipt from "@/components/Receipt";
+// import Receipt from "@/components/Receipt";
+import QRCodeModal from "@/components/QRCode";
 
 export default function App() {
   // declare state variables---->
@@ -110,7 +111,6 @@ export default function App() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
-        credentials: "include", // Send cookies
         body: JSON.stringify(formData),
       });
       if (!response.ok) {
@@ -118,19 +118,7 @@ export default function App() {
       }
       const responseData = await response.json();
       setResponseData(responseData.receipt);
-      Alert.alert(
-        responseData.title,
-        responseData.message,
-        [
-          {
-            text: "OK",
-            onPress: () => {},
-          },
-        ],
-        { cancelable: false }
-      );
       setModalVisible(true);
-      console.log(responseData);
       resetForm();
     } catch (err) {
       console.error("Fetch error:", err);
@@ -382,6 +370,18 @@ export default function App() {
               </TouchableOpacity>
             )}
           </View>
+          {responseData && (
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={() => setModalVisible(true)}
+            >
+              <ThemedText
+                style={[styles.resetButtonText, { color: colors.text }]}
+              >
+                Show Receipt Details
+              </ThemedText>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity style={styles.submitButton} onPress={submitDetails}>
             <View
               style={{
@@ -412,18 +412,6 @@ export default function App() {
               <Ionicons name="refresh-outline" size={20} color="white" />
             </View>
           </TouchableOpacity>
-          {responseData && (
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={() => setModalVisible(true)}
-            >
-              <ThemedText
-                style={[styles.resetButtonText, { color: colors.text }]}
-              >
-                Show Receipt
-              </ThemedText>
-            </TouchableOpacity>
-          )}
         </View>
       </ScrollView>
       {formSubmitting && (
@@ -431,27 +419,13 @@ export default function App() {
           <ActivityIndicator size="large" color="#0a7ea4" />
         </View>
       )}
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View
-          style={[
-            styles.modalContainer,
-            { backgroundColor: colors.background },
-          ]}
-        >
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={{ color: colors.text }}>Close</Text>
-          </TouchableOpacity>
-          {responseData && <Receipt responseData={responseData} />}
-        </View>
-      </Modal>
+      {responseData && (
+        <QRCodeModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          responseData={responseData}
+        />
+      )}
     </View>
   );
 }

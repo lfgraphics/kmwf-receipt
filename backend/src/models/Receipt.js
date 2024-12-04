@@ -7,7 +7,7 @@ const CounterSchema = new mongoose.Schema({
     seq: { type: Number, required: true, default: 0 },
 });
 
-const Counter = mongoose.model("Counter", CounterSchema);
+const ReceiptCounter = mongoose.model("ReceiptCounter", CounterSchema);
 
 // Receipt Schema
 const ReceiptSchema = new mongoose.Schema({
@@ -39,7 +39,7 @@ ReceiptSchema.pre("save", async function (next) {
     if (this.isNew) {
         try {
             // Increment the counter
-            const counter = await Counter.findOneAndUpdate(
+            const counter = await ReceiptCounter.findOneAndUpdate(
                 { modelName: "Receipt" }, // Filter
                 { $inc: { seq: 1 } }, // Update
                 { new: true, upsert: true } // Options: return updated doc, create if not exists
@@ -54,4 +54,4 @@ ReceiptSchema.pre("save", async function (next) {
 
 const Receipt = mongoose.model("Receipt", ReceiptSchema);
 
-module.exports = { Receipt, Counter };
+module.exports = { Receipt, ReceiptCounter };
