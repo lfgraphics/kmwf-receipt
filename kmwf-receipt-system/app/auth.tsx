@@ -28,10 +28,10 @@ export default function AuthScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const scrollViewRef = useRef<ScrollView>(null);
-  const passwordInputRef = useRef<TextInput>(null);
-  const phoneNumberInputRef = useRef<TextInput>(null);
   const nameInputRef = useRef<TextInput>(null);
+  const phoneNumberInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const handleAuth = async () => {
     setIsLoading(true);
@@ -199,7 +199,7 @@ export default function AuthScreen() {
                   value={name}
                   onChangeText={setName}
                   returnKeyType="next"
-                  onSubmitEditing={() => handleAuth}
+                  onSubmitEditing={() => phoneNumberInputRef.current?.focus()}
                   blurOnSubmit={true}
                 />
               </View>
@@ -219,13 +219,14 @@ export default function AuthScreen() {
                 value={phoneNo}
                 onChangeText={setPhoneNumber}
                 keyboardType="phone-pad"
+                maxLength={10}
                 returnKeyType="next"
-                onSubmitEditing={() => nameInputRef.current?.focus()}
+                onSubmitEditing={() => passwordInputRef.current?.focus()}
                 blurOnSubmit={false}
               />
             </View>
             <View style={styles.inputContainer}>
-              <Text style={{ color: colors.text }}>Password:</Text>
+              <Text style={{ color: colors.text }}>{!isLogin ? "Create a new" : "Enter your" } password:</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   ref={passwordInputRef}
@@ -242,11 +243,7 @@ export default function AuthScreen() {
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                   returnKeyType={isLogin ? "done" : "next"}
-                  onSubmitEditing={() =>
-                    isLogin
-                      ? handleAuth()
-                      : phoneNumberInputRef.current?.focus()
-                  }
+                  onSubmitEditing={handleAuth}
                   blurOnSubmit={isLogin}
                 />
                 <TouchableOpacity

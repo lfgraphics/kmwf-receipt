@@ -97,10 +97,12 @@ const VehicleDispensesPage = () => {
 
     return (
         <div className="relative">
-            {(loading || records.length < 1) && (
+            {loading && (
                 <Loading />
             )}
-            <Toaster />
+ <Toaster />
+           {records
+           <> 
             <div className="bigScreen bg-background z-10 hidden lg:block sticky top-0 pt-[60px] pb-2">
                 <div className="mb-4 flex flex-col gap-3 justify-between  sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                     {/* Sort By Dropdown */}
@@ -375,6 +377,8 @@ const VehicleDispensesPage = () => {
                     </div>
                 </TableCaption>
             </Table>
+            </>
+            }
         </div >
     );
 };

@@ -2,7 +2,9 @@ import { DateOptions } from "./../types/index";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";
 
-const imageToBase64 = async (uri: string): Promise<string> => {
+export const frontendUrl = "http://localhost:3000"
+
+export const imageToBase64 = async (uri: string): Promise<string> => {
   const base64 = await FileSystem.readAsStringAsync(uri, {
     encoding: FileSystem.EncodingType.Base64,
   });
@@ -32,4 +34,13 @@ export const formatDate = (dateString: string) => {
     timeZone: "Asia/Kolkata",
   };
   return new Intl.DateTimeFormat("en-IN", options).format(date);
+};
+
+export const generateQr = (data: string): string => {
+  if (!data) {
+    throw new Error("Data is required to generate a QR code");
+  }
+  return `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&margin=5&data=${encodeURIComponent(
+    data
+  )}`;
 };

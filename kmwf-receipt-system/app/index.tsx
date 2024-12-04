@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 // import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { checkUserLoggedIn } from "@/src/utils/authUtils";
 
 const App = () => {
   const router = useRouter();
@@ -41,10 +42,7 @@ const App = () => {
           setUserData(JSON.parse(userDataString));
         }
 
-        // if (!checkUserLoggedIn) {
-        //   router.replace("/auth" as any);
-        //   return;
-        // }
+        checkUserLoggedIn();
       } catch (error) {
         console.error("Error initializing app:", error);
         setError(

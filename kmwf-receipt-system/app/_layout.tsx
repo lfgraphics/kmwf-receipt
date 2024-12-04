@@ -7,6 +7,7 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "react-native";
 import { useEffect } from "react";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -33,17 +34,14 @@ export default function RootLayout() {
   
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={colorScheme === "dark" ? "#121212" : "#ffffff"}
+      />
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="screens/receipt" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="fueling" options={{ headerShown: false }} /> */}
-        {/* <Stack.Screen name="notifications" options={{ headerShown: false }} /> */}
         <Stack.Screen name="auth" options={{ headerShown: false }} />
-        {/* <Stack.Screen
-          name="NotificationFueling"
-          options={{ title: 'Fueling Notification', headerShown: false }}
-        /> */}
-
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>

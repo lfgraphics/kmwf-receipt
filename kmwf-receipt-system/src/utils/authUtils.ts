@@ -1,5 +1,6 @@
 // import { registerForPushNotificationsAsync } from '@/app/utils/notifications';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 import { Alert } from "react-native";
 
 export const baseUrl = "http://192.168.137.1:4000"; //http://192.168.177.228:4000 // https://kmwf-receipt-system.onrender.com //192.168.177.228 //192.168.137.1
@@ -12,24 +13,20 @@ export const checkUserLoggedIn = async () => {
       return true; // Assume logged in for offline mode
     }
 
+    const token = await AsyncStorage.getItem("userToken");
+
     const response = await fetch(`${baseUrl}/auth/verify-token`, {
       method: "POST",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      if (errorData.message === "Invalid or expired token") {
-        // Trigger logout or token refresh process
-        logoutUser();
-      }
-      Alert.alert(
-        "Authentication Error",
-        errorData.message || "Invalid session"
-      );
+      logoutUser();
+      Alert.alert("Authentication Error", "Invalid session");
       return false;
     }
 
@@ -108,4 +105,5 @@ export const logoutUser = async (): Promise<void> => {
   // Remove push token from AsyncStorage on logout
   await AsyncStorage.removeItem("pushToken");
   await AsyncStorage.removeItem("UserData");
+  router.replace("/auth");
 };
