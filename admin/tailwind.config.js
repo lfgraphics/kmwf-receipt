@@ -57,6 +57,9 @@ export default {
 					"5": "hsl(var(--chart-5))",
 				},
 			},
+			fontFamily: {
+				urdu: ['"Noto Nastaliq Urdu"', 'serif'], // Use your chosen font
+			},
 		},
 	},
 	plugins: [tailwindcssAnimate], // Use the imported module

@@ -201,7 +201,7 @@ export default function App() {
               <TextInput
                 ref={nameInputRef}
                 style={[styles.input, { color: colors.text }]}
-                placeholder="Enter Name"
+                placeholder="نام"
                 placeholderTextColor={
                   colorScheme === "dark" ? "#9BA1A6" : "#687076"
                 }
@@ -218,7 +218,7 @@ export default function App() {
               <TextInput
                 ref={mobileInputRef}
                 style={[styles.input, { color: colors.text }]}
-                placeholder="Enter Mpbile Number"
+                placeholder="1234567890"
                 placeholderTextColor={
                   colorScheme === "dark" ? "#9BA1A6" : "#687076"
                 }
@@ -237,7 +237,7 @@ export default function App() {
               <TextInput
                 ref={addressInputRef}
                 style={[styles.input, { color: colors.text }]}
-                placeholder="Enter Address"
+                placeholder="پتہ"
                 placeholderTextColor={
                   colorScheme === "dark" ? "#9BA1A6" : "#687076"
                 }
@@ -275,7 +275,7 @@ export default function App() {
               <TextInput
                 ref={amountInWordsInputRef}
                 style={[styles.input, { color: colors.text }]}
-                placeholder="Five Thousand only"
+                placeholder="پانچ ہزار روپے"
                 keyboardType="default"
                 placeholderTextColor={
                   colorScheme === "dark" ? "#9BA1A6" : "#687076"
@@ -303,7 +303,7 @@ export default function App() {
                 }}
                 dropdownIconColor={colors.text}
               >
-                <Picker.Item label="Sadqa" value="Sadqa" />
+                <Picker.Item label="صدقہ" value="Sadqa" />
                 <Picker.Item label="Zakat" value="Zakat" />
               </Picker>
             </View>

@@ -102,9 +102,8 @@ const VehicleDispensesPage = () => {
     <div className="relative">
       {loading && <Loading />}
       <Toaster />
-      <div className="bigScreen bg-background z-10 hidden lg:block sticky top-0 pt-[60px] pb-2">
+      {/* <div className="bigScreen bg-background z-10 hidden lg:block sticky top-0 pt-[60px] pb-2">
         <div className="mb-4 flex flex-col gap-3 justify-between  sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
-          {/* Sort By Dropdown */}
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="flex items-center justify-between border rounded p-2 w-full">
               <SelectValue placeholder="Sort By" />
@@ -121,8 +120,6 @@ const VehicleDispensesPage = () => {
               </SelectItem>
             </SelectContent>
           </Select>
-
-          {/* Order Dropdown */}
           <Select value={order} onValueChange={setOrder}>
             <SelectTrigger className="flex items-center justify-between border rounded p-2  w-full">
               <SelectValue placeholder="Order" />
@@ -186,7 +183,6 @@ const VehicleDispensesPage = () => {
             }}
             className="w-full sm:w-auto"
           />
-          {/* <DatePickerWithRange onDateChange={handleDateChange} /> */}
           <div className="flex items-center justify-between">
             <Input
               placeholder="Filter by Trip Sheet Id/ Number"
@@ -217,8 +213,8 @@ const VehicleDispensesPage = () => {
             {records.length} out of {totalRecords} records{" "}
           </div>
         </div>
-      </div>
-      <Accordion
+      </div> */}
+      {/* <Accordion
         type="single"
         collapsible
         className="block lg:hidden smallScreen bg-background z-10 top-0 py-2"
@@ -227,7 +223,6 @@ const VehicleDispensesPage = () => {
           <AccordionTrigger>Filters and sorting</AccordionTrigger>
           <AccordionContent>
             <div className="mb-4 flex flex-col sm:flex-row flex-wrap sm:space-x-2 space-y-2 sm:space-y-0 w-full">
-              {/* Sort By Dropdown */}
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="flex items-center justify-between border rounded p-2  w-full self-center">
                   <SelectValue placeholder="Sort By" />
@@ -245,7 +240,6 @@ const VehicleDispensesPage = () => {
                 </SelectContent>
               </Select>
 
-              {/* Order Dropdown */}
               <Select value={order} onValueChange={setOrder}>
                 <SelectTrigger className="flex items-center justify-between border rounded p-2 w-full self-center">
                   <SelectValue placeholder="Order" />
@@ -344,7 +338,7 @@ const VehicleDispensesPage = () => {
             </div>
           </AccordionContent>
         </AccordionItem>
-      </Accordion>
+      </Accordion> */}
       <Table>
         <TableHeader>
           <TableRow>

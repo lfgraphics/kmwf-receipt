@@ -7,6 +7,13 @@ body {
   color: #000;
 }
 
+@font-face {
+    font-family: 'Jameel Noori Nastaliq';
+    src: url('/fonts/JameelNooriNastaliq-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

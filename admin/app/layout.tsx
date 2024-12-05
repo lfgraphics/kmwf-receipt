@@ -1,11 +1,11 @@
-"use client"
-import { ThemeProvider } from "@/components/theme-provider"
-import { useEffect, useState } from 'react';
+"use client";
+import { ThemeProvider } from "@/components/theme-provider";
+import { useEffect, useState } from "react";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from '@/components/layout/Sidebar';
-import { isAuthenticated } from '@/lib/auth';
-import Head from 'next/head';
+import { Sidebar } from "@/components/layout/Sidebar";
+import { isAuthenticated } from "@/lib/auth";
+import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <Head>
+        (if it's a single-page app) or _document.tsx file (if using Next.js):
+        html Copy code
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
@@ -39,9 +45,7 @@ export default function RootLayout({
         >
           {isAuth && <Sidebar />}
           <div className={`min-h-full`}>
-            <main className="px-4 pb-4 md:px-8 md:pb-8">
-              {children}
-            </main>
+            <main className="px-4 pb-4 md:px-8 md:pb-8">{children}</main>
           </div>
         </ThemeProvider>
       </body>

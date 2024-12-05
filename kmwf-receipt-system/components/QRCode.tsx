@@ -46,6 +46,14 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
     });
   };
 
+  const sendOnWhatsapp =()=>{
+    let text = `نام: ${responseData?.name}\nرسید نمبر: ${responseData?.receiptNumber}\nمد: ${responseData?.subsType === "Mahana" ? "ماہانہ" : "سالانہ"} ${responseData?.mad === "Sadqa" ? "صدقہ" : "زکات"}\nرقم: ${responseData?.amount}\nتاریخ: ${new Date(responseData?.createdAt!).toLocaleDateString()}\n\nمحصل: ${responseData.usoolKuninda.name}\nاس رسید کو آن لائن دیکھ سکتے ہیں: ${url}`
+    let whatsAppUrl = `https://wa.me/91${responseData.mobile.trim()}?text=${text}`;
+    Linking.openURL(whatsAppUrl).catch(() => {
+      Alert.alert("Error", "Failed to open URL in browser.");
+    });
+  }
+
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <ThemedView
@@ -82,10 +90,18 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
                 Visit in Browser
               </ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <ThemedText style={styles.closeText}>Close</ThemedText>
+            <TouchableOpacity
+              style={styles.wahtsappButton}
+              onPress={sendOnWhatsapp}
+            >
+              <ThemedText style={styles.buttonText}>
+                Send on Whatsapp
+              </ThemedText>
             </TouchableOpacity>
           </View>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <ThemedText style={styles.closeText}>Close</ThemedText>
+          </TouchableOpacity>
         </ThemedView>
       </ThemedView>
     </Modal>
@@ -111,6 +127,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "baseline",
+    gap:4
   },
   modalContainer: {
     width: "80%",
@@ -144,9 +161,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   visitButton: {
+    marginLeft:-8,
     backgroundColor: "#0a7ea4",
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  wahtsappButton: {
+    backgroundColor: "#25D366",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     borderRadius: 5,
     marginBottom: 10,
   },
