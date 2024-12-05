@@ -29,9 +29,8 @@ import {
 import Link from "next/link";
 import { isAuthenticated } from "@/lib/auth";
 import Loading from "../loading";
-import { Check, Eye, ListChecks, ListX, X } from "lucide-react";
+import { Eye} from "lucide-react";
 import { BASE_URL } from "@/lib/api";
-import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { formatDate } from "@/lib/utils";
 
@@ -57,9 +56,6 @@ const VehicleDispensesPage = () => {
   const [limit, setLimit] = useState(20);
   const [loading, setLoading] = useState(true);
   const [verificationStatus, setVerificationStatus] = useState("all");
-  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-  const [selectAll, setSelectAll] = useState(false);
-  const { toast } = useToast();
 
   const checkAuth = () => {
     const authenticated = isAuthenticated();
@@ -78,7 +74,7 @@ const VehicleDispensesPage = () => {
   const fetchRecords = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:4000/receipts", {
+      const response = await axios.get(`${BASE_URL}/receipts`, {
         params: {
           page: currentPage,
           limit: limit,
@@ -372,11 +368,6 @@ const VehicleDispensesPage = () => {
             records.map((record, index) => (
               <TableRow
                 key={index}
-                className={
-                  selectedRows.has(`${record._id}`)
-                    ? "bg-blue-200 hover:bg-blue-100 text-black"
-                    : ""
-                }
               >
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{record.receiptNumber}</TableCell>
@@ -395,11 +386,7 @@ const VehicleDispensesPage = () => {
                 <TableCell className="flex gap-2 items-center">
                   <Link href={`/dispense-records/${record._id}`}>
                     <Button
-                      variant={
-                        selectedRows.has(`${record._id}`)
-                          ? "secondary"
-                          : "outline"
-                      }
+                      variant="outline"
                       size="sm"
                     >
                       <Eye />

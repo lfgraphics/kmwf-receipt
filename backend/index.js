@@ -34,10 +34,6 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}, ${req.headers.authorization}`);
-  next();
-});
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI).then(() => console.log("Connected to MongoDB Atlas")).catch(err => console.log(err));

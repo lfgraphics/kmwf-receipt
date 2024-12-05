@@ -5,8 +5,6 @@ const SECRET_KEY = process.env.JWT_SECRET;
 
 const authMiddleware = (allowedRoles = []) => {
     return (req, res, next) => {
-
-        console.log(req.cookies)
         try {
             // Extract the token from cookies or Authorization header
             const token = req.cookies.authToken || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
