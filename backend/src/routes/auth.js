@@ -13,7 +13,7 @@ router.post("/signup", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 3 }), 
   const { name, pas, phoneNo, } = req.body;
   try {
     const hashedPassword = await argon2.hash(pas);
-    const user = new User({ name, phoneNo, pas: hashedPassword, role:"user" });
+    const user = new User({ name, phoneNo, pas: hashedPassword, role: "recipient", verified: true });
     await user.save();
     res.status(201).json({ heading: "Success", message: "User registered successfully!" });
   } catch (error) {
