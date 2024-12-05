@@ -37,7 +37,7 @@ export function Sidebar() {
         </SheetTrigger>
         <SheetContent side="left" className="fixed top-0 left-0 z-40 h-full w-60 shadow bg-background">
           <SheetHeader>
-            <SheetTitle>Bowser Admin</SheetTitle>
+            <SheetTitle>KMWF Admin</SheetTitle>
           </SheetHeader>
           <SheetDescription></SheetDescription>
           <div className="flex flex-col h-full p-3" onClick={toggleSidebar}>
@@ -52,42 +52,10 @@ export function Sidebar() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/my-allocations">
-                    <Button variant="ghost" className="w-full justify-start">
-                      <ClipboardList className="mr-2 h-4 w-4" />
-                      My Allocations
-                    </Button>
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/dispense-records">
-                    <Button variant="ghost" className="w-full justify-start">
-                      <SheetIcon className="mr-2 h-4 w-4" />
-                      Dispense Records
-                    </Button>
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/tripsheets">
-                    <Button variant="ghost" className="w-full justify-start">
-                      <ListCheck className="mr-2 h-4 w-4" />
-                      Trip Sheets
-                    </Button>
-                  </Link>
-                </li>
-                <li>
                   <Link href="/profile">
                     <Button variant="ghost" className="w-full justify-start">
                       <User className="mr-2 h-4 w-4" />
                       Profile
-                    </Button>
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/manage-bowsers">
-                    <Button variant="ghost" className="w-full justify-start">
-                      <CaravanIcon className="mr-2 h-4 w-4" />
-                      Manage Bowsers
                     </Button>
                   </Link>
                 </li>
