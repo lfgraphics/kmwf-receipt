@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from "react";
-import UsersCard from '@/components/UsersCard';
+import UsersCard from '@/components/DataCard';
 import { getUsers, updateUserVerification, deleteUser, updateUserRoles, getRoles, getUnAuthorizedLogins, updateUserDevice, deleteUnAuthorizedRequest } from '../../lib/api';
 import { Button } from "@/components/ui/button";
 import { Check, CheckCircle, Search, X, XCircle } from "lucide-react";
