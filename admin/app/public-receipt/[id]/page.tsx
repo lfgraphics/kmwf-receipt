@@ -7,7 +7,7 @@ import { ReceiptDetails } from "@/types";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-export const page = ({ params }: { params: { id: string } }) => {
+export const Page = ({ params }: { params: { id: string } }) => {
   //   const checkAuth = () => {
   //     const authenticated = isAuthenticated();
   //     if (!authenticated) {
@@ -52,4 +52,4 @@ export const page = ({ params }: { params: { id: string } }) => {
   );
 };
 
-export default page;
+export default Page;
