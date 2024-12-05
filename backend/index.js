@@ -10,23 +10,25 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Middleware
-const allowedOrigins = [process.env.FRONTEND_URL]; // This can be dynamic
+const allowedOrigins = [
+  process.env.FRONTEND_URL, // Using the environment variable for dynamic URL
+  "https://kmwf-receipt.vercel.app" // Production frontend URL
+];
+
 app.use(
   cors({
-    origin: "http://localhost:3000", // Replace with your frontend's URL
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like Postman or server-side requests)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true, // Enable credentials
   })
 );
-// app.use(cors({
-//   origin: (origin, callback) => {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not allowed by CORS"));
-//     }
-//   },
-//   credentials: true,
-// }));
+
 app.use(cookieParser());
 
 app.use(bodyParser.json());

@@ -193,7 +193,7 @@ export default function App() {
           style={[styles.formContainer, { backgroundColor: colors.background }]}
         >
           <View style={styles.rowContainer}>
-            <ThemedText type="title">KMWF Reciept</ThemedText>
+            <ThemedText type="title">KMWF Reciepient</ThemedText>
           </View>
           <View style={styles.section}>
             <View style={styles.inputContainer}>

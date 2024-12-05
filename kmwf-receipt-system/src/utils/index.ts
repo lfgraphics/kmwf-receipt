@@ -2,7 +2,7 @@ import { DateOptions } from "./../types/index";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";
 
-export const frontendUrl = "http://localhost:3000"
+export const frontendUrl = "https://kmwf-receipt.vercel.app"
 
 export const imageToBase64 = async (uri: string): Promise<string> => {
   const base64 = await FileSystem.readAsStringAsync(uri, {
