@@ -44,9 +44,8 @@ router.post("/login", async (req, res) => {
     res.cookie("authToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // Ensure cookie is secure in production
-      sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax', // Use 'None' for production (cross-domain) and 'Lax' for local dev
+      sameSite: 'None',
       path: '/',
-      domain: process.env.NODE_ENV === "production" ? "kmwf-receipt.vercel.app" : "localhost", // Set the domain properly in production
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
