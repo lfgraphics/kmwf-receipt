@@ -28,7 +28,7 @@ export default function Page({ params }: { params: { id: string } }) {
     const fetchRecords = async () => {
       try {
         const response = await axios.get(
-          `http://192.168.137.1:4000/receipts/${params.id}`
+          `${BASE_URL}/receipts/params.id}`
         );
         setRecord(response.data);
       } catch (error) {
