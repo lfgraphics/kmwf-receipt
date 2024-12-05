@@ -1,7 +1,7 @@
 {
-    "name": "Bowser Admin",
-    "short_name": "BowserAdmin",
-    "description": "Admin panel for Bowser application",
+    "name": "KMWF Administrator",
+    "short_name": "KMWF Admin",
+    "description": "Admin panel for Incom and Expences management",
     "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#00000",

@@ -11,7 +11,8 @@ const PORT = process.env.PORT || 4000;
 
 // Middleware
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // Using the environment variable for dynamic URL
+  "http://localhost:3000",
+  "http://192.168.137.1:3000",
   "https://kmwf-receipt.vercel.app" // Production frontend URL
 ];
 

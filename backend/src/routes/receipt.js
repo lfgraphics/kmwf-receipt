@@ -32,7 +32,7 @@ router.post("/create-bulk", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5
 });
 
 // Get a single receipt by ID
-router.get("/:id", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 20 }), authMiddleware(["recipient", "admin"]), async (req, res) => {
+router.get("/:id", createRateLimiter({ windowMs: 15 * 60 * 1000, max: 20 }), async (req, res) => {
     try {
         const receipt = await Receipt.findById(req.params.id);
         if (!receipt) return res.status(404).json({ title: 'Success', message: "Receipt not found" });

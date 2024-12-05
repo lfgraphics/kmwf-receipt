@@ -27,7 +27,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   onClose,
   responseData,
 }) => {
-  const url = `${frontendUrl}/public-receipt?phoneNo=${responseData.mobile}&rectNo=${responseData.receiptNumber}`;
+  const url = `${frontendUrl}/public-receipt/${responseData._id}`;
   const qrCodeUrl = `${generateQr(url)}`;
 
   const { colors } = useTheme();
