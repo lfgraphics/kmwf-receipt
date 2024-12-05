@@ -7,16 +7,16 @@ import { ReceiptDetails } from "@/types";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-export const Page = ({ params }: { params: { id: string } }) => {
-  //   const checkAuth = () => {
-  //     const authenticated = isAuthenticated();
-  //     if (!authenticated) {
-  //       window.location.href = "/login";
-  //     }
-  //   };
-  //   useEffect(() => {
-  //     checkAuth();
-  //   }, []);
+export default function Page({ params }: { params: { id: string } }) {
+  // const checkAuth = () => {
+  //   const authenticated = isAuthenticated();
+  //   if (!authenticated) {
+  //     window.location.href = "/login";
+  //   }
+  // };
+  // useEffect(() => {
+  //   checkAuth();
+  // }, []);
 
   const [record, setRecord] = useState<ReceiptDetails>();
   useEffect(() => {
@@ -38,18 +38,14 @@ export const Page = ({ params }: { params: { id: string } }) => {
       {/* <FuelRecordCard record={record} /> */}
       <h1>Receipt Details</h1>
       {/* {record && ( */}
-      <>
-        <div className="h-full w-full">
-          <img
-            className="h-[2in] w-full"
-            src="https://kmwf-admin.vercel.app/assets/images/media/receipt.jpg"
-            alt="check"
-          />
-        </div>
-      </>
+      <div className="h-full w-full">
+        <img
+          className="h-[2in] w-full"
+          src="https://kmwf-admin.vercel.app/assets/images/media/receipt.jpg"
+          alt="check"
+        />
+      </div>
       {/* //   )} */}
     </div>
   );
-};
-
-export default Page;
+}
